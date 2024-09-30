@@ -4,9 +4,9 @@ from flask import Flask, request, jsonify
 from pymongo import MongoClient
 
 # Import custom modules for database interactions
-import usersDB
-import projectsDB
-import hardwareDB
+import usersDatabse
+import projectsDatabase
+import hardwareDatabase
 
 # Define the MongoDB connection string
 MONGODB_SERVER = "your_mongodb_connection_string_here"
