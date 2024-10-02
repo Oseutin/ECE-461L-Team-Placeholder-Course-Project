@@ -2,6 +2,7 @@
 from bson.objectid import ObjectId
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 
 # Import custom modules for database interactions
 import usersDatabse
@@ -9,10 +10,24 @@ import projectsDatabase
 import hardwareDatabase
 
 # Define the MongoDB connection string
-MONGODB_SERVER = "your_mongodb_connection_string_here"
+MONGODB_SERVER = "mongodb+srv://amybae:abcdefg@placeholdercluster.odsig.mongodb.net/?retryWrites=true&w=majority&appName=PlaceholderCluster"
+
+client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
+
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
 
 # Initialize a new Flask web application
 app = Flask(__name__)
+
+#Example API endpoint, DO NOT USE
+@app.route('/welcome', methods=['GET'])
+def welcome():
+    return jsonify({"message": "Welcome to the API!"})
 
 # Route for user login
 @app.route('/login', methods=['POST'])
@@ -194,4 +209,5 @@ def check_inventory():
 
 # Main entry point for the application
 if __name__ == '__main__':
-    app.run()
+    #Please do not change this
+    app.run(host='127.0.0.1', port=5000)
