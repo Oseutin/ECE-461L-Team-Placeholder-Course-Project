@@ -1,6 +1,7 @@
 // src/SignUpPage.js
 
 import { Link } from 'react-router-dom';
+import Button from '../components/Button'; 
 
 const AddUser = () => {
   return (
@@ -34,12 +35,14 @@ const AddUser = () => {
               placeholder="********"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
-          >
-            Sign Up
-          </button>
+          <Button
+            label="Sign Up"
+            onClick={(e) => {
+              e.preventDefault();
+            }}
+            variant="primary"
+            size="large" 
+          />
         </form>
         <div className="text-center">
           <p className="text-sm text-gray-600">

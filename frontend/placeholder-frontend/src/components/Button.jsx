@@ -11,7 +11,7 @@ const Button = ({ label, onClick, variant = 'primary', size = 'medium', disabled
   const sizes = {
     small: 'text-sm px-3 py-1.5',
     medium: 'text-base px-4 py-2',
-    large: 'text-lg px-5 py-3',
+    large: 'text-lg px-40 py-3',
   };
 
   return (
