@@ -1,11 +1,34 @@
-// src/LoginPage.js
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const LoginPage = () => {
+  /*
+  This useEffect and useState serve to show how we will be connecting the front end to the backend. The way that useEffect 
+  works is that it just runs the callback message aka it just calls the api. If you are curious, the reason fetch('/api/welcome')
+  works is because in the vite.config.js file I set api/ to go to localhost:5000 aka where the Flask backend is located. /api/ WILL ALWAYS
+  be needed at the front, the rest of the /welcome will be the endpoint that is written in the Flask backend. 
+  */
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const fetchMessage = async () => {
+      try {
+        const response = await fetch('/api/welcome');
+        const data = await response.json();
+        setMessage(data.message);
+      } catch (error) {
+        console.error('Error fetching message:', error);
+      }
+    };
+    fetchMessage();
+  }, []);
+
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center">Placeholder Login</h2>
+        {/* The return message from the API is here*/}
+        {message && <p className="text-center text-sm text-gray-600">{message}</p>} 
         <form className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
