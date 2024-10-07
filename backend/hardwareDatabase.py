@@ -12,7 +12,10 @@ HardwareSet = {
 
 class HardwareSet:
     # constructor
-    def __init__(self):
+    def __init__(self, client):
+        self.__client = client
+        self.__db = client['hardwareDB']
+        self.__hardwareSet_collection = self.db['hardwareSets']
         self.__hwName
         self.__capacity
         self.__initCapacity
@@ -38,7 +41,7 @@ class HardwareSet:
         return self.__capacity
     
     # MongoDB related
-    def to_dict(self):
+    def create_MDB_hardwareSet(self):
         return {
         'hwName': self.__hwName,
         'capacity': self.__capacity,
@@ -46,70 +49,49 @@ class HardwareSet:
         }
 
     # Function to create a new hardware set
-    def createHardwareSet(client, hwSetName, initCapacity):
+    def createHardwareSet(self, hwSetName, initCapacity):
         # Create a new hardware set in the database
-        db = client['hardware_inventory']
-        collection = db['hardware_sets']
-        
-        # Create the hardware set
-        hardware_set = HardwareSet(hwSetName, initCapacity, initCapacity)
-        
-        # Insert into MongoDB
-        collection.insert_one(hardware_set.to_dict())
-        #pass
+        hardware_set = {
+            'hwName': self.__hwName,
+            'initCapacity': self.__initCapacity,
+            'capacity': self.__capacity
+        }
+
+        self.__hardwareSet_collection.insert_one(hardware_set)
 
     # Function to query a hardware set by its name
-    def queryHardwareSet(client, hwSetName):
+    def queryHardwareSet(self, hwSetName):
         # Query and return a hardware set from the database
-        db = client['hardware_inventory']
-        collection = db['hardware_sets']
-        
-        # Find the hardware set by name
-        return collection.find_one({'hwName': hwSetName})
-        #pass
+        return self.__hardwareSet_collection.find_one({'hwName': hwSetName})
 
     # Function to update the availability of a hardware set
-    def updateAvailability(client, hwSetName, newAvailability):
+    def updateAvailability(self, hwSetName, newAvailability):
         # Update the availability of an existing hardware set
-        db = client['hardware_inventory']
-        collection = db['hardware_sets']
-        
-        # Update the availability in the database
-        result = collection.update_one(
+        result = self.__hardwareSet_collection.update_one(
             {'hwName': hwSetName},
-            {'$set': {'availability': newAvailability}}
+            {'$set': {'capacity': newAvailability}}
         )
         return result.modified_count > 0
-        #pass
 
     # Function to request space from a hardware set
-    def requestSpace(client, hwSetName, amount):
+    def requestSpace(self, hwSetName, amount):
         # Request a certain amount of hardware and update availability
-        db = client['hardware_inventory']
-        collection = db['hardware_sets']
+        hardware_set = self.__hardwareSet_collection.find_one({'hwName': hwSetName})
         
-        # Find the hardware set
-        hardware_set = collection.find_one({'hwName': hwSetName})
-        if hardware_set and hardware_set['availability'] >= amount:
-            new_availability = hardware_set['availability'] - amount
+        if hardware_set and hardware_set['capacity'] >= amount:
+            new_capacity = hardware_set['capacity'] - amount
             
-            # Update availability
-            collection.update_one(
+            # Update capacity
+            self.__hardwareSet_collection.update_one(
                 {'hwName': hwSetName},
-                {'$set': {'availability': new_availability}}
+                {'$set': {'capacity': new_capacity}}
             )
             return True
         else:
             return False
-        #pass
 
     # Function to get all hardware set names
     def getAllHwNames(client):
         # Get and return a list of all hardware set names
-        db = client['hardware_inventory']
-        collection = db['hardware_sets']
-        
-        # Get all the hardware set names
-        hardware_sets = collection.find({}, {'hwName': 1})
+        hardware_sets = self.__hardwareSet_collection.find({}, {'hwName': 1})
         return [hw['hwName'] for hw in hardware_sets]
-        #pass
