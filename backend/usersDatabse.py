@@ -1,4 +1,3 @@
-# Import necessary libraries and modules
 from pymongo import MongoClient
 import projectsDatabase
 
@@ -7,86 +6,116 @@ class usersDatabase:
     Structure of User entry:
     User = {
         'username': username,
-        'userId': userId,
         'password': password,
         'projects': [project1_ID, project2_ID, ...]
     }
     '''
     
-    def __init__(self, client):
-        self.client = client
-        self.db = client['userDB']  # Create or access the user database
-        self.users_collection = self.db['users']  # Collection to store user data
-    
+    def __init__(self, client: MongoClient):
+        # Private instance variables
+        self._client = client
+        self._db = self._client['userDB']  # Access the 'userDB' database
+        self._users_collection = self._db['users']  # Collection for users
+
+    # Getters and Setters for accessing private variables
+    def get_client(self):
+        return self._client
+
+    def get_db(self):
+        return self._db
+
+    def get_users_collection(self):
+        return self._users_collection
+
     # Function to add a new user
-    def addUser(self, username, userId, password):
-        # Check if the user already exists
-        if self.__queryUser(username, userId):
+    def add_user(self, username: str, password: str) -> bool:
+        if self.__query_user(username):
             print("User already exists!")
             return False
-        
-        # Add a new user to the database
-        user = {
+
+        new_user = {
             'username': username,
-            'userId': userId,
             'password': password,
             'projects': []
         }
-        self.users_collection.insert_one(user)
+        self._users_collection.insert_one(new_user)
         print("User added successfully!")
         return True
-    
-    # Helper function to query a user by username and userId
-    def __queryUser(self, username, userId):
-        # Query and return a user from the database
-        user = self.users_collection.find_one({'username': username, 'userId': userId})
-        return user
-    
-    # Function to log in a user
-    def login(self, username, userId, password):
-        # Authenticate a user and return login status
-        user = self.__queryUser(username, userId)
-        if user:
-            if user['password'] == password:
-                print("Login successful!")
-                return True
-            else:
-                print("Incorrect password!")
-        else:
-            print("User not found!")
-        return False
-    
-    # Function to add a user to a project
-    def joinProject(self, userId, projectId):
-        # Verify if the user exists
-        user = self.users_collection.find_one({'userId': userId})
+
+    # Helper function to query a user by username
+    def __query_user(self, username: str):
+        return self._users_collection.find_one({'username': username})
+
+    # Getter for retrieving a user by username
+    def get_user(self, username: str):
+        user = self.__query_user(username)
         if not user:
-            print("User not found!")
-            return False
-        
-        # Verify if the project exists
-        project = projectsDatabase.getProject(projectId)
-        if not project:
-            print("Project not found!")
-            return False
-        
-        # Add the project to the user's project list if it's not already there
-        if projectId not in user['projects']:
-            self.users_collection.update_one(
-                {'userId': userId},
-                {'$push': {'projects': projectId}}
+            print(f"User {username} not found!")
+            return None
+        return user
+
+    # Setter for updating user information
+    def update_user_password(self, username: str, new_password: str) -> bool:
+        if self.__query_user(username):
+            self._users_collection.update_one(
+                {'username': username},
+                {'$set': {'password': new_password}}
             )
-            print(f"User {userId} successfully added to project {projectId}.")
+            print(f"Password for {username} updated successfully!")
             return True
         else:
-            print(f"User {userId} is already part of the project {projectId}.")
+            print(f"User {username} not found!")
             return False
-    
-    # Function to get the list of projects for a user
-    def getUserProjectsList(self, userId):
-        # Get and return the list of projects a user is part of
-        user = self.users_collection.find_one({'userId': userId})
+
+    # Function to authenticate user login
+    def login(self, username: str, password: str) -> bool:
+        user = self.__query_user(username)
+        if user and user['password'] == password:
+            print("Login successful!")
+            return True
+        print("Incorrect password or user not found!")
+        return False
+
+    # Setter for adding a project to a user's project list
+    def join_project(self, username: str, project_id: str) -> bool:
+        user = self.__query_user(username)
         if not user:
-            print("User not found!")
+            print(f"User {username} not found!")
+            return False
+
+        project = projectsDatabase.getProject(project_id)
+        if not project:
+            print(f"Project {project_id} not found!")
+            return False
+
+        if project_id not in user['projects']:
+            self._users_collection.update_one(
+                {'username': username},
+                {'$push': {'projects': project_id}}
+            )
+            print(f"User {username} successfully added to project {project_id}.")
+            return True
+        else:
+            print(f"User {username} is already part of the project {project_id}.")
+            return False
+
+    # Getter for retrieving the list of projects for a user
+    def get_user_projects(self, username: str):
+        user = self.__query_user(username)
+        if not user:
+            print(f"User {username} not found!")
             return None
         return user.get('projects', [])
+
+    # Setter for updating the user's project list directly
+    def set_user_projects(self, username: str, new_projects: list) -> bool:
+        if self.__query_user(username):
+            self._users_collection.update_one(
+                {'username': username},
+                {'$set': {'projects': new_projects}}
+            )
+            print(f"Projects for {username} updated successfully!")
+            return True
+        else:
+            print(f"User {username} not found!")
+            return False
