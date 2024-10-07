@@ -22,13 +22,13 @@ jobs:
         node-version: 18
 
     - name: Install dependencies
-      working-directory: frontend/place-holderfrontend
+      working-directory: frontend/placeholder-frontend
       run: npm install
 
     - name: Run tests
-      working-directory: frontend/place-holderfrontend
+      working-directory: frontend/placeholder-frontend
       run: npm test
 
     - name: Build
-      working-directory: frontend/place-holderfrontend
+      working-directory: frontend/placeholder-frontend
       run: npm run build
