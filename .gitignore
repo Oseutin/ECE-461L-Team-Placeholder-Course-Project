@@ -27,3 +27,5 @@ dist-ssr
 __pycache__
 .pytest_cache
 *.py[cod]
+.venv
+.hypothesis
