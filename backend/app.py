@@ -28,7 +28,8 @@ app = Flask(__name__)
 swagg = Swagger(app)
 
 ##########################################################################################################################################
-#IGNORE UNTIL FURTHER NOTICE I WILL EXPLAIN NEXT WEEK DURING RECITATION
+# IGNORE UNTIL FURTHER NOTICE I WILL EXPLAIN NEXT WEEK DURING RECITATION
+
 
 @app.route('/welcome', methods=['GET'])
 def welcome():
@@ -43,16 +44,15 @@ def welcome():
     """
     return jsonify({"message": "Welcome to the API!"})
 
+
 @app.route("/spec")
 def spec():
     return jsonify(swagger(app))
-
-
 #########################################################################################################################################
 
-
-
 # Route for user login
+
+
 @app.route('/login', methods=['POST'])
 def login():
     # Extract data from request
@@ -67,6 +67,8 @@ def login():
     return jsonify({})
 
 # Route for the main page (Work in progress)
+
+
 @app.route('/main')
 def mainPage():
     # Extract data from request
@@ -81,6 +83,8 @@ def mainPage():
     return jsonify({})
 
 # Route for joining a project
+
+
 @app.route('/join_project', methods=['POST'])
 def join_project():
     # Extract data from request
@@ -95,6 +99,8 @@ def join_project():
     return jsonify({})
 
 # Route for adding a new user
+
+
 @app.route('/add_user', methods=['POST'])
 def add_user():
     # Extract data from request
@@ -109,6 +115,8 @@ def add_user():
     return jsonify({})
 
 # Route for getting the list of user projects
+
+
 @app.route('/get_user_projects_list', methods=['POST'])
 def get_user_projects_list():
     # Extract data from request
@@ -123,6 +131,8 @@ def get_user_projects_list():
     return jsonify({})
 
 # Route for creating a new project
+
+
 @app.route('/create_project', methods=['POST'])
 def create_project():
     # Extract data from request
@@ -137,6 +147,8 @@ def create_project():
     return jsonify({})
 
 # Route for getting project information
+
+
 @app.route('/get_project_info', methods=['POST'])
 def get_project_info():
     # Extract data from request
@@ -151,6 +163,8 @@ def get_project_info():
     return jsonify({})
 
 # Route for getting all hardware names
+
+
 @app.route('/get_all_hw_names', methods=['POST'])
 def get_all_hw_names():
     # Connect to MongoDB
@@ -163,6 +177,8 @@ def get_all_hw_names():
     return jsonify({})
 
 # Route for getting hardware information
+
+
 @app.route('/get_hw_info', methods=['POST'])
 def get_hw_info():
     # Extract data from request
@@ -177,6 +193,8 @@ def get_hw_info():
     return jsonify({})
 
 # Route for checking out hardware
+
+
 @app.route('/check_out', methods=['POST'])
 def check_out():
     # Extract data from request
@@ -191,6 +209,8 @@ def check_out():
     return jsonify({})
 
 # Route for checking in hardware
+
+
 @app.route('/check_in', methods=['POST'])
 def check_in():
     # Extract data from request
@@ -205,6 +225,8 @@ def check_in():
     return jsonify({})
 
 # Route for creating a new hardware set
+
+
 @app.route('/create_hardware_set', methods=['POST'])
 def create_hardware_set():
     # Extract data from request
@@ -219,6 +241,8 @@ def create_hardware_set():
     return jsonify({})
 
 # Route for checking the inventory of projects
+
+
 @app.route('/api/inventory', methods=['GET'])
 def check_inventory():
     # Connect to MongoDB
@@ -230,7 +254,8 @@ def check_inventory():
     # Return a JSON response
     return jsonify({})
 
+
 # Main entry point for the application
 if __name__ == '__main__':
-    #Please do not change this
+    # Please do not change this
     app.run(host='127.0.0.1', port=5000)
