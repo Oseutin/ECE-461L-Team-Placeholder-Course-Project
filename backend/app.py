@@ -1,6 +1,8 @@
 # Import necessary libraries and modules
 from bson.objectid import ObjectId
 from flask import Flask, request, jsonify
+from flasgger import Swagger
+from flask_swagger import swagger
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -23,11 +25,32 @@ except Exception as e:
 
 # Initialize a new Flask web application
 app = Flask(__name__)
+swagg = Swagger(app)
 
-#Example API endpoint, DO NOT USE
+##########################################################################################################################################
+#IGNORE UNTIL FURTHER NOTICE I WILL EXPLAIN NEXT WEEK DURING RECITATION
+
 @app.route('/welcome', methods=['GET'])
 def welcome():
+    """
+    Welcome endpoint.
+    ---
+    responses:
+      200:
+        description: Returns a welcome message.
+        examples:
+          message: Welcome to the API!
+    """
     return jsonify({"message": "Welcome to the API!"})
+
+@app.route("/spec")
+def spec():
+    return jsonify(swagger(app))
+
+
+#########################################################################################################################################
+
+
 
 # Route for user login
 @app.route('/login', methods=['POST'])
