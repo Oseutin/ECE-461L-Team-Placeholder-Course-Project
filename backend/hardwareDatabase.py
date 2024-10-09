@@ -10,12 +10,13 @@ HardwareSet = {
 }
 '''
 
+
 class HardwareSet:
     # constructor
     def __init__(self, client):
         self.__client = client
         self.__db = client['hardwareDB']
-        self.__hardwareSet_collection = self.db['hardwareSets']
+        self.__hardwareSet_collection = self.__db['hardwareSets']
         self.__hwName
         self.__capacity
         self.__initCapacity
@@ -34,18 +35,18 @@ class HardwareSet:
     def get_hwName(self):
         return self.__hwName
 
-    def get_capacity(self):
+    def get_initcapacity(self):
         return self.__initCapacity
 
     def get_capacity(self):
         return self.__capacity
-    
+
     # MongoDB related
     def create_MDB_hardwareSet(self):
         return {
-        'hwName': self.__hwName,
-        'capacity': self.__capacity,
-        'initCapacity': self.__initCapacity
+            'hwName': self.__hwName,
+            'capacity': self.__capacity,
+            'initCapacity': self.__initCapacity
         }
 
     # Function to create a new hardware set
@@ -76,22 +77,20 @@ class HardwareSet:
     # Function to request space from a hardware set
     def requestSpace(self, hwSetName, amount):
         # Request a certain amount of hardware and update availability
-        hardware_set = self.__hardwareSet_collection.find_one({'hwName': hwSetName})
-        
+        hardware_set = self.__hardwareSet_collection.find_one(
+            {'hwName': hwSetName})
         if hardware_set and hardware_set['capacity'] >= amount:
             new_capacity = hardware_set['capacity'] - amount
-            
             # Update capacity
             self.__hardwareSet_collection.update_one(
                 {'hwName': hwSetName},
                 {'$set': {'capacity': new_capacity}}
             )
             return True
-        else:
-            return False
+        return False
 
     # Function to get all hardware set names
-    def getAllHwNames(client):
+    def getAllHwNames(self):
         # Get and return a list of all hardware set names
         hardware_sets = self.__hardwareSet_collection.find({}, {'hwName': 1})
         return [hw['hwName'] for hw in hardware_sets]
