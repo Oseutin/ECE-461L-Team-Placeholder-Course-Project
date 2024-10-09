@@ -40,14 +40,8 @@ class hardwareDatabase:
 
     def get_capacity(self):
         return self.__capacity
-
+    
     # MongoDB related
-    def create_MDB_hardwareSet(self):
-        return {
-            'hwName': self.__hwName,
-            'capacity': self.__capacity,
-            'initCapacity': self.__initCapacity
-        }
 
     # Function to create a new hardware set
     def createHardwareSet(self, hwSetName, initCapacity):
