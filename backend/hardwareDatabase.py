@@ -11,7 +11,7 @@ HardwareSet = {
 '''
 
 
-class HardwareSet:
+class hardwareDatabase:
     # constructor
     def __init__(self, client):
         self.__client = client
