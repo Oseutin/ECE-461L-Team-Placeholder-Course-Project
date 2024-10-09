@@ -1,0 +1,58 @@
+name: Python application
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'  # Only run when files in the backend directory change
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'  # Only run on PRs if files in the backend directory change
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    
+    - name: Install dependencies
+      run: |
+        cd backend  # Change to the backend directory
+        python -m pip install --upgrade pip
+        pip install flake8 pytest schemathesis requests
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Lint with flake8
+      run: |
+        cd backend  # Change to the backend directory
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Start Flask app
+      run: |
+        cd backend  # Change to the backend directory
+        nohup python app.py &  # Start your Flask app in the background
+        # Wait for the app to be ready
+        for i in {1..10}; do
+          if curl -s http://127.0.0.1:5000/; then
+            echo "Flask app is up!"
+            break
+          fi
+          echo "Waiting for Flask app to start..."
+          sleep 5
+        done
+
+    - name: Test with pytest
+      run: |
+        cd backend  # Change to the backend directory
+        pytest  # Run the tests
