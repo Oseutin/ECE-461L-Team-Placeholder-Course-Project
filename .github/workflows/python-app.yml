@@ -52,6 +52,9 @@ jobs:
           sleep 5
         done
 
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV  # Set PYTHONPATH to the current directory
+
     - name: Test with pytest
       run: |
         cd backend  # Change to the backend directory
