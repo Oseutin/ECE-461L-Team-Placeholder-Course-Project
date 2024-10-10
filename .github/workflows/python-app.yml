@@ -4,11 +4,11 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'backend/**'  # Only run when files in the backend directory change
+      - 'backend/**'
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'backend/**'  # Only run on PRs if files in the backend directory change
+      - 'backend/**'
 
 permissions:
   contents: read
@@ -16,6 +16,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend  # Set PYTHONPATH globally for the job
 
     steps:
     - uses: actions/checkout@v4
@@ -52,8 +55,6 @@ jobs:
         done
 
     - name: Test with pytest
-      env:
-        PYTHONPATH: backend  # Set the PYTHONPATH environment variable for this step
       run: |
         cd backend
         pytest
