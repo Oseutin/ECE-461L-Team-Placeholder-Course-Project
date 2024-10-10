@@ -45,6 +45,7 @@ jobs:
       run: |
         cd backend
         nohup python app.py &
+        APP_PID=$!
         for i in {1..10}; do
           if curl -s http://127.0.0.1:5000/; then
             echo "Flask app is up!"
@@ -53,11 +54,13 @@ jobs:
           echo "Waiting for Flask app to start..."
           sleep 5
         done
-
+    
     - name: Check PYTHONPATH
-      run: echo "PYTHONPATH is set to: $PYTHONPATH"
+      run: |
+        echo "PYTHONPATH is set to: $PYTHONPATH"
 
     - name: Test with pytest
       run: |
         cd backend
-        pytest
+        pytest 
+      
