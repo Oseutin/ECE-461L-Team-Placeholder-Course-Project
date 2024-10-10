@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
 # Import custom modules for database interactions
-import usersDatabse
+import usersDatabase
 import projectsDatabase
 import hardwareDatabase
 
