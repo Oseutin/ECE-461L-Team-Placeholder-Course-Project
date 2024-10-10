@@ -1,5 +1,5 @@
 import pytest
-from usersDatabase import usersDatabase  
+from ..usersDatabase import usersDatabase  
 
 # Mock MongoClient for testing
 class MockMongoClient:
