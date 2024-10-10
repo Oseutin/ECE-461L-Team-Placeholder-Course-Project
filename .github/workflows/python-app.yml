@@ -27,22 +27,21 @@ jobs:
     
     - name: Install dependencies
       run: |
-        cd backend  # Change to the backend directory
+        cd backend
         python -m pip install --upgrade pip
         pip install flake8 pytest schemathesis requests
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
     - name: Lint with flake8
       run: |
-        cd backend  # Change to the backend directory
+        cd backend
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
     - name: Start Flask app
       run: |
-        cd backend  # Change to the backend directory
-        nohup python app.py &  # Start your Flask app in the background
-        # Wait for the app to be ready
+        cd backend
+        nohup python app.py &
         for i in {1..10}; do
           if curl -s http://127.0.0.1:5000/; then
             echo "Flask app is up!"
@@ -52,10 +51,9 @@ jobs:
           sleep 5
         done
 
-    - name: Set PYTHONPATH
-      run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV  # Set PYTHONPATH to the current directory
-
     - name: Test with pytest
+      env:
+        PYTHONPATH: backend  # Set the PYTHONPATH environment variable for this step
       run: |
-        cd backend  # Change to the backend directory
-        pytest  # Run the tests
+        cd backend
+        pytest
