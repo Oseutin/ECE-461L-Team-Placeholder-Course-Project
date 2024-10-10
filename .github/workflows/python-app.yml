@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: ${{ github.workspace }}/backend  # Set PYTHONPATH globally for the job
+      PYTHONPATH: ${{ github.workspace }}/backend
 
     steps:
     - uses: actions/checkout@v4
@@ -54,6 +54,9 @@ jobs:
           sleep 5
         done
 
+    - name: Check PYTHONPATH
+      run: echo "PYTHONPATH is set to: $PYTHONPATH"
+      
     - name: Test with pytest
       run: |
         cd backend
