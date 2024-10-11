@@ -14,15 +14,6 @@ import hardwareDatabase
 # Define the MongoDB connection string
 MONGODB_SERVER = "mongodb+srv://amybae:abcdefg@placeholdercluster.odsig.mongodb.net/?retryWrites=true&w=majority&appName=PlaceholderCluster"
 
-client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
-
-# Send a ping to confirm a successful connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-
 # Initialize a new Flask web application
 app = Flask(__name__)
 swagg = Swagger(app)
@@ -98,25 +89,42 @@ def join_project():
     # Return a JSON response
     return jsonify({})
 
+
 # Route for adding a new user
-
-
 @app.route('/add_user', methods=['POST'])
 def add_user():
     # Extract data from request
+    user_data = request.get_json()
+    username = user_data.get('username')
+    password = user_data.get('password')
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required fields"}), 400
 
     # Connect to MongoDB
-
+    client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
+    # Send a ping to confirm a successful connection
+    try:
+        client.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB!")
+    except Exception as e:
+        print(e)
+        client.close()  # Close the client in case of connection failure
+        return jsonify({"error": "Could not connect to the database"}), 500
+    
     # Attempt to add the user using the usersDB module
+    db = usersDatabase.usersDatabase(client)
+    if not db.add_user(username, password):
+        client.close()  # Close the client if user addition fails
+        return jsonify({"error": "Failed to add user due to validation or duplicate issues"}), 400
 
-    # Close the MongoDB connection
+    # Close the client after successful operation
+    client.close()  
+    return jsonify({"message": "User added successfully"}), 201
 
-    # Return a JSON response
-    return jsonify({})
+
 
 # Route for getting the list of user projects
-
-
 @app.route('/get_user_projects_list', methods=['POST'])
 def get_user_projects_list():
     # Extract data from request

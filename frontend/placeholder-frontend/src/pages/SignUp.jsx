@@ -1,16 +1,43 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Container, Link, Box } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { TextField, Button, Typography, Container, Link, Box, CircularProgress  } from '@mui/material';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const SignUp = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement sign-up logic
-    console.log('Signing up with', { username, password });
+    setLoading(true);
+    try {
+      const response = await fetch('/add_user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || 'An error occurred during signup');
+        return;
+      }
+  
+      const data = await response.json();
+      console.log('User added successfully:', data);
+      
+      navigate('/');
+      setUsername('');
+      setPassword('');
+    } catch (error) {
+      console.error('Error during signup:', error);
+    } finally{
+      setLoading(false);
+    }
   };
   
   return (
@@ -58,9 +85,10 @@ const SignUp = () => {
             fullWidth
             variant="contained"
             sx={{ mt: 2 }}
-            startIcon={<PersonAddIcon />}
+            startIcon={loading ? <CircularProgress size={24} /> : <PersonAddIcon />}
+            disabled={loading}
           >
-            Sign Up
+            {loading ? 'Signing Up...' : 'Sign Up'}
           </Button>
           <Typography variant="body2" align="center" sx={{ mt: 2 }}>
             Already have an account?{' '}
