@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Container, Typography, Box, Card, CardContent, Grid } from '@mui/material';
+import { Container, Typography, Card, CardContent, Grid } from '@mui/material';
 
 const Projects = () => {
   // Get the user data from the state passed via navigation
