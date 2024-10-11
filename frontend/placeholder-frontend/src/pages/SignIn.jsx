@@ -1,16 +1,43 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Container, Link, Box } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { TextField, Button, Typography, Container, Link, Box, CircularProgress } from '@mui/material';
+import { Link as RouterLink,useNavigate } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
 
 const SignIn = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   
-  const handleSubmit = e => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     // TODO: Implement sign-in logic
-    console.log('Signing in with', { username, password });
+    setLoading(true);
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || 'An error occurred during sign in');
+        return;
+      }
+      const data = await response.json();
+      console.log('User logged in successfully:', data);
+      
+      navigate('/projects', { state: { user: data.user } });
+    
+    } catch (error) {
+      console.error('Error during sign in:', error);
+      alert('Failed to sign in. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
@@ -59,8 +86,9 @@ const SignIn = () => {
             variant="contained"
             sx={{ mt: 2 }}
             startIcon={<LoginIcon />}
+            disabled={loading}
           >
-            Sign In
+            {loading ? <CircularProgress size={24} /> : 'Sign In'}
           </Button>
           <Typography variant="body2" align="center" sx={{ mt: 2 }}>
             Don't have an account?{' '}

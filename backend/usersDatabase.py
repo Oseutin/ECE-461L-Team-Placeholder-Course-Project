@@ -68,13 +68,13 @@ class usersDatabase:
             return False
 
     # Function to authenticate user login
-    def login(self, username: str, password: str) -> bool:
-        user = self.__query_user(username)
+    def login(self, username: str, password: str):
+        user = self.__query_user(username)  # Fetch user data from the database
         if user and user['password'] == password:
             print("Login successful!")
-            return True
+            return user  # Return the entire user data instead of just True
         print("Incorrect password or user not found!")
-        return False
+        return None 
 
     # Setter for adding a project to a user's project list
     def join_project(self, username: str, project_id: str) -> bool:

@@ -41,21 +41,46 @@ def spec():
     return jsonify(swagger(app))
 #########################################################################################################################################
 
+def serialize_user(user):
+    user['_id'] = str(user['_id'])  # Convert ObjectId to string
+    return user
+
 # Route for user login
-
-
 @app.route('/login', methods=['POST'])
 def login():
     # Extract data from request
+    user_data = request.get_json()
+    username = user_data.get('username')
+    password = user_data.get('password')
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required fields"}), 400
 
     # Connect to MongoDB
+    client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
+    # Send a ping to confirm a successful connection
+    try:
+        client.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB!")
+    except Exception as e:
+        print(e)
+        client.close()  # Close the client in case of connection failure
+        return jsonify({"error": "Could not connect to the database"}), 500
+    
+    # Attempt to add the user using the usersDB module
+    db = usersDatabase.usersDatabase(client)
+    user_info = db.login(username, password)
+    if user_info is None:
+        client.close()  # Close the client after login fails
+        return jsonify({"error": "Failed to add user due to validation or duplicate issues"}), 400
+    # Close the client after successful login
+    user_info = serialize_user(user_info)
+    client.close()  
+    return jsonify({
+        "message": "User logged in successfully",
+        "user": user_info  # Include user data in the response
+    }), 200
 
-    # Attempt to log in the user using the usersDB module
-
-    # Close the MongoDB connection
-
-    # Return a JSON response
-    return jsonify({})
 
 # Route for the main page (Work in progress)
 
