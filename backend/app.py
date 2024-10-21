@@ -340,15 +340,28 @@ def create_hardware_set():
 
 @app.route('/api/inventory', methods=['GET'])
 def check_inventory():
-    # Connect to MongoDB
+    try:
+        # Connect to MongoDB
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client["HardwareCheckout"]
 
-    # Fetch all projects from the HardwareCheckout.Projects collection
+        # Fetch all projects from the Projects collection
+        projects_collection = db["Projects"]
+        all_projects = list(projects_collection.find({}))
 
-    # Close the MongoDB connection
+        # Fetch all projects from the HardwareCheckout.Projects collection
+        # Convert MongoDB ObjectId to string for JSON serialization
+        for project in all_projects:
+            project['_id'] = str(project['_id'])
 
-    # Return a JSON response
-    return jsonify({})
+        # Close the MongoDB connection
+        client.close()
 
+        # Return a JSON response with the list of projects
+        return jsonify({"success": True, "projects": all_projects}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 # Main entry point for the application
 if __name__ == '__main__':
