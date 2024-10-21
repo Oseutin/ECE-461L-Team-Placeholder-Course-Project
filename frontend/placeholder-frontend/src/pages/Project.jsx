@@ -1,56 +1,60 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { Container, Typography, Card, CardContent, Grid } from '@mui/material';
+import * as React from 'react';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import CardMedia from '@mui/material/CardMedia';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid2';
+import Fab from '@mui/material/Fab';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
 
-const Projects = () => {
-  // Get the user data from the state passed via navigation
-  const location = useLocation();
-  const { user } = location.state || {}; // Optional chaining to avoid errors if state is undefined
+const projects = [
+  { id: '001', image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=' },
+  { id: '002', image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=' },
+  { id: '003', image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=' },
+  { id: '004', image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=' },
+  { id: '005', image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=' },
+  { id: '006', image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=' },
+];
 
-  // Sample project data
-  const projects = [
-    {
-      title: 'Project Alpha',
-      description: 'An innovative project that focuses on creating sustainable energy solutions.',
-    },
-    {
-      title: 'Project Beta',
-      description: 'A web application for managing personal finances efficiently.',
-    },
-    {
-      title: 'Project Gamma',
-      description: 'A mobile app that helps users track their fitness goals and activities.',
-    },
-  ];
-
+export default function Project() {
   return (
-    <Container>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Projects
-      </Typography>
-      {user && (
-        <Typography variant="h6" component="h2" gutterBottom>
-          Welcome, {user.username}!
-        </Typography>
-      )}
-      <Grid container spacing={4}>
+    <Box sx={{ padding: 2 }}>
+      <Grid container spacing={2} columns={12}>
         {projects.map((project, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <Card>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+            <Card sx={{ minWidth: 345 }}>
+              <CardMedia
+                sx={{ height: 140 }}
+                image={project.image}
+              />
               <CardContent>
-                <Typography variant="h5" component="h3">
-                  {project.title}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {project.description}
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {project.id}
                 </Typography>
               </CardContent>
+              <CardActions>
+                <Button size="small">View Hardware</Button>
+              </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
-    </Container>
-  );
-};
 
-export default Projects;
+      {/* Floating action button */}
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{
+          position: 'absolute',
+          bottom: 16,
+          right: 16,
+        }}
+      >
+        <AddIcon />
+      </Fab>
+    </Box>
+  );
+}
