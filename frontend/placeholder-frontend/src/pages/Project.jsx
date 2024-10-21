@@ -4,7 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -57,6 +57,7 @@ const projects = [
 
 export default function Project() {
   const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -66,10 +67,28 @@ export default function Project() {
     setOpen(false);
   };
 
+  const filteredProjects = projects.filter(project =>
+    project.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Box sx={{ padding: 2 }}>
+      {/* Search Bar */}
+      <TextField
+        variant="outlined"
+        placeholder="Search by project name"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          width: 300,
+        }}
+      />
+
       <Grid container spacing={2} columns={12}>
-        {projects.map((project, index) => (
+        {filteredProjects.map((project, index) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
             <Card sx={{ minWidth: 345 }}>
               <CardMedia sx={{ height: 140 }} image={project.image} />
@@ -85,6 +104,7 @@ export default function Project() {
           </Grid>
         ))}
       </Grid>
+
       <React.Fragment>
         <Fab
           color="primary"
@@ -241,8 +261,8 @@ export default function Project() {
             <Button onClick={handleClose} color="error" variant="outlined">
               Cancel
             </Button>
-            <Button type="submit" color="primary" variant="contained">
-              Create Project
+            <Button onClick={handleClose} color="primary" variant="contained">
+              Create
             </Button>
           </DialogActions>
         </Dialog>
