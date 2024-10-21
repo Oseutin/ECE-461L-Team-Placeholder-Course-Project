@@ -20,7 +20,7 @@ swagg = Swagger(app)
 
 ##########################################################################################################################################
 # IGNORE UNTIL FURTHER NOTICE I WILL EXPLAIN NEXT WEEK DURING RECITATION
-#ok! - amy
+
 
 @app.route('/welcome', methods=['GET'])
 def welcome():
@@ -152,31 +152,56 @@ def add_user():
 # Route for getting the list of user projects
 @app.route('/get_user_projects_list', methods=['POST'])
 def get_user_projects_list():
-    # Extract data from request
+    try:
+        # Extract data from request
+        user_id = request.json.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
 
-    # Connect to MongoDB
+        # Connect to MongoDB
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
+        user_db = usersDatabase(client)
+        project_db = projectsDatabase(client)
 
-    # Fetch the user's projects using the usersDB module
+        # Fetch the user's projects
+        user = user_db.get_user(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
 
-    # Close the MongoDB connection
+        projects = project_db.get_projects_by_user(user_id)
+        project_list = [project for project in projects]
 
-    # Return a JSON response
-    return jsonify({})
+        # Close the MongoDB connection
+        client.close()
+
+        # Return a JSON response with the projects list
+        return jsonify({'projects': project_list}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Route for creating a new project
+
 
 @app.route('/create_project', methods=['POST']) 
 def create_project():
     try:
         # Extract data from request
-        project_data = request.get_json()
+        user_id = request.json.get('user_id')
+        project_data = request.json.get('project_data')
+        
+        if not user_id or not project_data:
+            return jsonify({'error': 'User ID and project data are required'}), 400
 
         # Connect to MongoDB
-        client = MongoClient("mongodb://localhost:27017/")
-        db = client["your_db_name"]
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
+        project_db = projectsDatabase(client)
 
-        # Attempt to create the project using the projectsDB module
-        result = projectsDatabase.create_project(db, project_data)
+        # Create a new project
+        project_id = project_db.create_project({
+            'user_id': user_id,
+            **project_data
+        })
 
         # Close the MongoDB connection
         client.close()
@@ -188,6 +213,7 @@ def create_project():
         return jsonify({"success": False, "message": str(e)}), 500
 
 # Route for getting project information
+
 
 @app.route('/get_project_info', methods=['POST'])
 def get_project_info():
@@ -212,6 +238,7 @@ def get_project_info():
         return jsonify({"success": False, "message": str(e)}), 500
 
 # Route for getting all hardware names
+
 
 @app.route('/get_all_hw_names', methods=['POST'])
 def get_all_hw_names():
