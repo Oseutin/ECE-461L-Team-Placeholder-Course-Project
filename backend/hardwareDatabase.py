@@ -36,19 +36,50 @@ class hardwareDatabase:
             }
             self.__hardwareSet_collection.insert_one(hwset2)
 
+
+    def updateUsage(client, projectId, hwSetName, qty):
+        db = client['projectDB']
+        project_collection = db['projects']
+        result = project_collection.update_one(
+            {'projectId': projectId},
+            {'$set': {f'hwSets.{hwSetName}': qty}}
+        )
+        return result.modified_count > 0
+
     # Function to get current available capacity for a specific hardware set
     def get_available_capacity(self, hwSetName):
         hw_set = self.__hardwareSet_collection.find_one({"hwName": hwSetName})
         return hw_set['available_capacity'] if hw_set else None
 
+    # Function to check out hardware for a project
+    def checkInHW(self, projectId, hwSetName, qty, username):
+        # Check if the project exists directly in the projects collection
+        project = self.__project_collection.find_one({'projectId': projectId})
+        if project is None:
+            return False  # Project not found
+
+        # Check if the project has enough hardware to return
+        current_qty = project['hwSets'].get(hwSetName, 0)
+        return_qty = min(qty, current_qty)
+
+        # Update available capacity in hardware set
+        self.returnSpace(hwSetName, return_qty)
+
+        # Update project's hardware usage with the returned quantity
+        new_qty = current_qty - return_qty
+        self.__project_collection.update_one(
+            {'projectId': projectId},
+            {'$set': {f'hwSets.{hwSetName}': new_qty}}
+        )
+
+        # Return True if the full quantity was returned, otherwise False
+        return return_qty == qty
+
     # Function to request space from a specific hardware set
     def requestSpace(self, hwSetName, amount):
-        # Get the hardware set's current available capacity
         hw_set = self.__hardwareSet_collection.find_one({"hwName": hwSetName})
-        
         if hw_set and hw_set['available_capacity'] >= amount:
             new_capacity = hw_set['available_capacity'] - amount
-            # Update available capacity in the database
             self.__hardwareSet_collection.update_one(
                 {"hwName": hwSetName},
                 {"$set": {"available_capacity": new_capacity}}
@@ -58,22 +89,13 @@ class hardwareDatabase:
 
     # Function to return hardware to a specific hardware set
     def returnSpace(self, hwSetName, amount):
-        # Get the hardware set's current available capacity
         hw_set = self.__hardwareSet_collection.find_one({"hwName": hwSetName})
-        
         if hw_set:
             new_capacity = hw_set['available_capacity'] + amount
-            # Ensure we do not exceed the total capacity
             new_capacity = min(new_capacity, hw_set['total_capacity'])
-            # Update available capacity in the database
             self.__hardwareSet_collection.update_one(
                 {"hwName": hwSetName},
                 {"$set": {"available_capacity": new_capacity}}
             )
             return True
         return False
-
-    # Function to get all hardware set names (should return ["HWset1", "HWset2"])
-    def getAllHwNames(self):
-        hardware_sets = self.__hardwareSet_collection.find({}, {'hwName': 1})
-        return [hw['hwName'] for hw in hardware_sets]
