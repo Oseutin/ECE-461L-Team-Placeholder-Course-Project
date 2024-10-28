@@ -10,7 +10,6 @@ HardwareSet = {
 }
 '''
 
-
 class hardwareDatabase:
     def __init__(self, client):
         self.__client = client
