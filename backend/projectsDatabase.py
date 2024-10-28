@@ -8,7 +8,7 @@ def queryProject(client, projectId):
     return project_collection.find_one({'projectId': projectId})
 
 # Function to create a new project
-def createProject(client, projectName, description):
+def createProject(client, projectName, projectId, description):
     db = client['projectDB']
     project_collection = db['projects']
     projectCount = project_collection.count_documents({})
