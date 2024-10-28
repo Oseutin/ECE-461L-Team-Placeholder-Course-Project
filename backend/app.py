@@ -85,34 +85,77 @@ def login():
 # Route for the main page (Work in progress)
 
 
-@app.route('/main')
+@app.route('/main', methods=['POST'])
 def mainPage():
-    # Extract data from request
+    try:
+        # Extract data from request
+        data = request.get_json()
+        username = data.get('username')
 
-    # Connect to MongoDB
+        if not username:
+            return jsonify({'error': 'Username is required'}), 400
 
-    # Fetch user projects using the usersDB module
+        # Connect to MongoDB
+        client = MongoClient('mongodb://localhost:27017/')
+        user_db = usersDatabase(client)
 
-    # Close the MongoDB connection
+        # Fetch user projects
+        user = user_db.get_user(username)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
 
-    # Return a JSON response
-    return jsonify({})
+        project_ids = user_db.get_user_projects(username)
+        
+        # Close the MongoDB connection
+        client.close()
+
+        # Return a JSON response with the projects list
+        return jsonify({'projects': project_ids}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Route for joining a project
 
 
 @app.route('/join_project', methods=['POST'])
 def join_project():
-    # Extract data from request
+    try:
+        # Extract data from request
+        data = request.get_json()
+        username = data.get('username')
+        project_id = data.get('project_id')
+        
+        if not username or not project_id:
+            return jsonify({'error': 'Username and project ID are required'}), 400
 
-    # Connect to MongoDB
+        # Connect to MongoDB
+        client = MongoClient('mongodb://localhost:27017/')
+        user_db = usersDatabase(client)
+        project_db = projectsDatabase(client)
 
-    # Attempt to join the project using the usersDB module
+        # Attempt to join the project using the usersDatabase module
+        user_exists = user_db.get_user(username)
+        if not user_exists:
+            return jsonify({'error': 'User not found'}), 404
 
-    # Close the MongoDB connection
+        project_exists = project_db.queryProject(project_id)
+        if not project_exists:
+            return jsonify({'error': 'Project not found'}), 404
 
-    # Return a JSON response
-    return jsonify({})
+        # Join the project if not already a member
+        join_success = user_db.join_project(username, project_id)
+
+        # Close the MongoDB connection
+        client.close()
+
+        if join_success:
+            return jsonify({'message': f'User {username} joined project {project_id} successfully'}), 200
+        else:
+            return jsonify({'error': 'User is already a member of the project or there was an error'}), 400
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 # Route for adding a new user
