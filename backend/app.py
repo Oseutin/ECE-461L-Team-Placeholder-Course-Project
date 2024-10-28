@@ -85,35 +85,7 @@ def login():
 # Route for the main page (Work in progress)
 
 
-@app.route('/main', methods=['POST'])
-def mainPage():
-    try:
-        # Extract data from request
-        data = request.get_json()
-        username = data.get('username')
-
-        if not username:
-            return jsonify({'error': 'Username is required'}), 400
-
-        # Connect to MongoDB
-        client = MongoClient('mongodb://localhost:27017/')
-        user_db = usersDatabase(client)
-
-        # Fetch user projects
-        user = user_db.get_user(username)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-
-        project_ids = user_db.get_user_projects(username)
-        
-        # Close the MongoDB connection
-        client.close()
-
-        # Return a JSON response with the projects list
-        return jsonify({'projects': project_ids}), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
 
 # Route for joining a project
 
@@ -130,7 +102,7 @@ def join_project():
             return jsonify({'error': 'Username and project ID are required'}), 400
 
         # Connect to MongoDB
-        client = MongoClient('mongodb://localhost:27017/')
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
         user_db = usersDatabase(client)
         project_db = projectsDatabase(client)
 
@@ -265,7 +237,7 @@ def get_project_info():
         project_id = request.get_json().get('project_id')
 
         # Connect to MongoDB
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
         db = client["your_db_name"]
 
         # Fetch project information using the projectsDB module
@@ -287,7 +259,7 @@ def get_project_info():
 def get_all_hw_names():
     try:
         # Connect to MongoDB
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
         db = client["your_db_name"]
 
         # Fetch all hardware names using the hardwareDB module
@@ -313,7 +285,7 @@ def check_out():
         checkout_data = request.get_json()
 
         # Connect to MongoDB
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
         db = client["your_db_name"]
 
         # Attempt to check out the hardware using the projectsDB module
@@ -338,7 +310,7 @@ def check_in():
         checkin_data = request.get_json()
 
         # Connect to MongoDB
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
         db = client["your_db_name"]
 
         # Attempt to check in the hardware using the projectsDB module
@@ -363,7 +335,7 @@ def create_hardware_set():
         hardware_data = request.get_json()
 
         # Connect to MongoDB
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
         db = client["your_db_name"]
 
         # Attempt to create the hardware set using the hardwareDB module
@@ -385,7 +357,7 @@ def create_hardware_set():
 def check_inventory():
     try:
         # Connect to MongoDB
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
         db = client["HardwareCheckout"]
 
         # Fetch all projects from the Projects collection
