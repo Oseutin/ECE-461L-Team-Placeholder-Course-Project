@@ -7,35 +7,17 @@ const HardwarePage = () => {
   const location = useLocation();
   const user = location.state.user;
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      name: "Project Name 1",
+  const [projects, setProjects] = useState(
+    user?.projects?.map((projectName, index) => ({
+      id: index + 1, // Generates a unique ID based on the index
+      name: projectName,
       hardware: [
         { name: "HWSet1", checkedOut: 50, total: 100 },
         { name: "HWSet2", checkedOut: 0, total: 100 },
       ],
-      joined: false,
-    },
-    {
-      id: 2,
-      name: "Project Name 2",
-      hardware: [
-        { name: "HWSet1", checkedOut: 50, total: 100 },
-        { name: "HWSet2", checkedOut: 0, total: 100 },
-      ],
-      joined: true,
-    },
-    {
-      id: 3,
-      name: "Project Name 3",
-      hardware: [
-        { name: "HWSet1", checkedOut: 0, total: 100 },
-        { name: "HWSet2", checkedOut: 0, total: 100 },
-      ],
-      joined: false,
-    },
-  ]);
+      joined: false, // Set the default joined status to false
+    })) || [],
+  );
 
   const toggleJoinProject = async (projectId) => {
     const project = projects.find((p) => p.id === projectId);
