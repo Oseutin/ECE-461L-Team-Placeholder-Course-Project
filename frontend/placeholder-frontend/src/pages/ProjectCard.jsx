@@ -1,5 +1,6 @@
-import { Card, CardContent, Typography, Button, Grid } from "@mui/material";
+import { Card, CardContent, Typography, Button } from "@mui/material";
 import HardwareSet from "./HardwareSet";
+import Grid from "@mui/material/Grid2";
 
 const ProjectCard = ({ project, onToggleJoin, onCheckIn, onCheckOut }) => {
   return (
@@ -12,8 +13,9 @@ const ProjectCard = ({ project, onToggleJoin, onCheckIn, onCheckOut }) => {
       <CardContent>
         <Grid container alignItems="center" spacing={2}>
           <Grid item xs={3}>
-            <Typography variant="h6">{project.name}</Typography>
-            <Typography variant="body2">list, of, authorized, users</Typography>
+            <Typography variant="h6" color="text.secondary">
+              {project.name}
+            </Typography>{" "}
           </Grid>
           <Grid item xs={6}>
             {project.hardware.map((set, index) => (

@@ -1,8 +1,12 @@
 import { useState } from "react";
 import ProjectCard from "./ProjectCard";
-import { Container } from "@mui/material";
+import { Container, Button } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const HardwarePage = () => {
+  const location = useLocation();
+  const user = location.state.user;
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([
     {
       id: 1,
@@ -128,6 +132,14 @@ const HardwarePage = () => {
           onCheckOut={handleCheckOut}
         />
       ))}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => navigate("/projects", { state: { user: user } })}
+        style={{ marginTop: "16px" }}
+      >
+        Return to Project Page
+      </Button>
     </Container>
   );
 };
