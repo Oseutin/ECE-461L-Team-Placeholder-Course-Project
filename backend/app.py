@@ -95,28 +95,27 @@ def join_project():
     try:
         # Extract data from request
         data = request.get_json()
-        username = data.get('username')
-        project_id = data.get('project_id')
-        
+        username = data.get('user_id')
+        project_id = data.get('id')
+        print(username, project_id)
         if not username or not project_id:
             return jsonify({'error': 'Username and project ID are required'}), 400
 
         # Connect to MongoDB
         client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
-        user_db = usersDatabase(client)
-        project_db = projectsDatabase(client)
+        db = usersDatabase.usersDatabase(client)
 
         # Attempt to join the project using the usersDatabase module
-        user_exists = user_db.get_user(username)
+        user_exists = db.get_user(username)
         if not user_exists:
             return jsonify({'error': 'User not found'}), 404
 
-        project_exists = project_db.queryProject(project_id)
+        project_exists = projectsDatabase.queryProject(client, project_id)
         if not project_exists:
             return jsonify({'error': 'Project not found'}), 404
 
         # Join the project if not already a member
-        join_success = user_db.join_project(username, project_id)
+        join_success = db.join_project(username, project_id)
 
         # Close the MongoDB connection
         client.close()
@@ -200,32 +199,22 @@ def get_user_projects_list():
 
 @app.route('/create_project', methods=['POST']) 
 def create_project():
-    try:
-        # Extract data from request
-        user_id = request.json.get('user_id')
-        project_data = request.json.get('project_data')
-        
-        if not user_id or not project_data:
-            return jsonify({'error': 'User ID and project data are required'}), 400
+    # Extract data from request
+    user_id = request.json.get('user_id')
+    project_data = request.json.get('project_data')
 
-        # Connect to MongoDB
-        client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
-        project_db = projectsDatabase(client)
+    if not user_id or not project_data:
+        return jsonify({'error': 'User ID and project data are required'}), 400
 
-        # Create a new project
-        project_id = project_db.create_project({
-            'user_id': user_id,
-            **project_data
-        })
-
-        # Close the MongoDB connection
+    # Connect to MongoDB
+    client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
+    if not projectsDatabase.createProject(client, project_data.get('name'), project_data.get('id'),
+                                   project_data.get('description'),user_id):
         client.close()
-
-        # Return a JSON response with the result
-        return jsonify({"success": True, "message": "Project created successfully", "result": result}), 200
-
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+        return jsonify({"success": False, "message": str("Project ID already exists")}), 500
+    # Close the MongoDB connection
+    client.close()
+    return jsonify({"success": True, "message": "Project created successfully"}), 200
 
 # Route for getting project information
 
@@ -381,4 +370,4 @@ def check_inventory():
 # Main entry point for the application
 if __name__ == '__main__':
     # Please do not change this
-    app.run(host='127.0.0.1', port=5000)
+    app.run(host='127.0.0.1', port=5000, debug=True)

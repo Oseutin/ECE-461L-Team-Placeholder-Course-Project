@@ -83,11 +83,6 @@ class usersDatabase:
             print(f"User {username} not found!")
             return False
 
-        project = projectsDatabase.getProject(project_id)
-        if not project:
-            print(f"Project {project_id} not found!")
-            return False
-
         if project_id not in user['projects']:
             self._users_collection.update_one(
                 {'username': username},

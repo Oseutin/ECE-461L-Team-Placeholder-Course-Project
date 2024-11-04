@@ -1,15 +1,17 @@
 from pymongo import MongoClient
 import hardwareDatabase
 
+
+
 # Function to query a project by its ID
 def queryProject(client, projectId):
-    db = client['projectDB']
+    db = client['projectsDB']
     project_collection = db['projects']
     return project_collection.find_one({'projectId': projectId})
 
 # Function to create a new project, ensuring uniqueness by projectId
-def createProject(client, projectName, projectId, description):
-    db = client['projectDB']
+def createProject(client, projectName, projectId, description,username):
+    db = client['projectsDB']
     project_collection = db['projects']
 
     # Check if a project with the same projectId already exists
@@ -22,7 +24,7 @@ def createProject(client, projectName, projectId, description):
         'projectId': projectId,
         'description': description,
         'hwSets': {},  # Hardware usage starts empty
-        'users': []    # No users at the start
+        'users': [username]    # No users at the start
     }
     project_collection.insert_one(project)
     print(f"Project '{projectName}' with ID '{projectId}' created successfully.")

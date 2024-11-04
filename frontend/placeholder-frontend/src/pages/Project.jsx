@@ -1,63 +1,25 @@
-import React, { useState } from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import CardMedia from '@mui/material/CardMedia';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Grid';
-import Fab from '@mui/material/Fab';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogActions from '@mui/material/DialogActions';
-import TextField from '@mui/material/TextField';
-
-const projects = [
-  {
-    id: '001',
-    description: "Hello world!",
-    name: 'Project 1',
-    image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=',
-  },
-  {
-    id: '002',
-    description: "Hello world!",
-    name: "Project 2",
-    image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=',
-  },
-  {
-    id: '003',
-    description: "Hello world!",
-    name: "Project 3",
-    image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=',
-  },
-  {
-    id: '004',
-    description: "Hello world!",
-    name: "Project 4",
-    image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=',
-  },
-  {
-    id: '005',
-    description: "Hello world!",
-    name: "Project 5",
-    image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=',
-  },
-  {
-    id: '006',
-    description: "Hello world!",
-    name: "Project 6",
-    image: 'https://media.istockphoto.com/id/1397047877/photo/main-microchip-on-the-motherboard.jpg?s=612x612&w=0&k=20&c=1_jGgHtpbePTeadRR_r8TCwIFAN9ZGRvAzfKftPFy50=',
-  },
-];
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  TextField,
+} from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Project() {
+  const location = useLocation();
+  const user = location.state.user;
   const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [open2, setOpen2] = useState(false);
+  const [projectId, setProjectId] = useState("");
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const navigate = useNavigate();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -67,206 +29,297 @@ export default function Project() {
     setOpen(false);
   };
 
-  const filteredProjects = projects.filter(project =>
-    project.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleClickOpen2 = () => {
+    setOpen2(true);
+  };
+
+  const handleClose2 = () => {
+    setOpen2(false);
+  };
+  const handleCreateProject = async () => {
+    try {
+      const response = await fetch("/create_project", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user.username,
+          project_data: {
+            id: projectId,
+            name: projectName,
+            description: projectDescription,
+          },
+        }),
+      });
+      if (response.ok) {
+        navigate("/hardware");
+      } else {
+        alert("Project ID already exists. Please try a new ID.");
+      }
+    } catch (error) {
+      console.error("Error creating project:", error);
+    }
+  };
+  const handleJoinProject = async () => {
+    try {
+      const response = await fetch("/join_project", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user.username,
+          id: projectId,
+        }),
+      });
+      if (response.ok) {
+        navigate("/hardware");
+      } else {
+        alert("Project ID does not exist. Please try a new ID.");
+      }
+    } catch (error) {
+      console.error("Error creating project:", error);
+    }
+  };
 
   return (
-    <Box sx={{ padding: 2 }}>
-      {/* Search Bar */}
-      <TextField
-        variant="outlined"
-        placeholder="Search by project name"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 2,
+      }}
+    >
+      {/* Create and Join Project Buttons */}
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <Button variant="contained" color="primary" onClick={handleClickOpen}>
+          Create Project
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleClickOpen2}
+        >
+          Join Project
+        </Button>
+      </Box>
+      {/* Dialog for Creating a New Project */}
+      <Dialog
+        open={open2}
+        onClose={handleClose2}
+        maxWidth="sm"
+        fullWidth
         sx={{
-          position: 'absolute',
-          top: 16,
-          right: 16,
-          width: 300,
+          "& .MuiDialog-paper": {
+            borderRadius: "16px",
+            backgroundColor: "#f5f5f5",
+            boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
+            transition: "all 0.3s ease",
+          },
         }}
-      />
-
-      <Grid container spacing={2} columns={12}>
-        {filteredProjects.map((project, index) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-            <Card sx={{ minWidth: 345 }}>
-              <CardMedia sx={{ height: 140 }} image={project.image} />
-              <CardContent>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {project.name} : {project.description}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button size="small">View Hardware</Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      <React.Fragment>
-        <Fab
-          color="primary"
-          aria-label="add"
+      >
+        <DialogTitle
           sx={{
-            position: 'absolute',
-            bottom: 16,
-            right: 16,
-          }}
-          onClick={handleClickOpen}
-        >
-          <AddIcon />
-        </Fab>
-
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          maxWidth="sm"
-          fullWidth
-          sx={{
-            '& .MuiDialog-paper': {
-              borderRadius: '16px',
-              backgroundColor: '#f5f5f5',
-              boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-              transition: 'all 0.3s ease',
-            },
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            color: "#3f51b5",
+            textAlign: "center",
           }}
         >
-          <DialogTitle
+          Join Project
+        </DialogTitle>
+
+        <DialogContent>
+          <DialogContentText
             sx={{
-              fontSize: '1.5rem',
-              fontWeight: 'bold',
-              color: '#3f51b5',
-              textAlign: 'center',
+              color: "black",
+              marginBottom: "16px",
+              fontSize: "1rem",
+              lineHeight: "1.5",
             }}
           >
-            Create New Project
-          </DialogTitle>
-
-          <DialogContent>
-            <DialogContentText
-              sx={{
-                color: 'black',
-                marginBottom: '16px',
-                fontSize: '1rem',
-                lineHeight: '1.5',
-              }}
-            >
-              To create a new project, please enter the following details:
-            </DialogContentText>
-
+            Please enter the Project ID you wish to join:
+          </DialogContentText>
+          <Box sx={{ width: 500, maxWidth: "100%" }}>
             <TextField
-              autoFocus
-              required
-              margin="dense"
-              id="projectName"
-              name="projectName"
-              label="Project Name"
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                style: { color: 'black' },
-              }}
-              InputLabelProps={{
-                style: { color: '#3f51b5' },
-              }}
-              sx={{
-                marginBottom: '16px',
-                backgroundColor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#3f51b5',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#3f51b5',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3f51b5',
-                  },
-                },
-              }}
-            />
-
-            <TextField
-              required
-              margin="dense"
-              id="description"
-              name="description"
-              label="Description"
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                style: { color: 'black' },
-              }}
-              InputLabelProps={{
-                style: { color: '#3f51b5' },
-              }}
-              sx={{
-                marginBottom: '16px',
-                backgroundColor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#3f51b5',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#3f51b5',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3f51b5',
-                  },
-                },
-              }}
-            />
-
-            <TextField
-              required
-              margin="dense"
-              id="projectID"
-              name="projectID"
               label="Project ID"
               fullWidth
-              variant="outlined"
-              InputProps={{
-                style: { color: 'black' },
-              }}
-              InputLabelProps={{
-                style: { color: '#3f51b5' },
-              }}
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
               sx={{
-                marginBottom: '16px',
-                backgroundColor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#3f51b5',
+                input: { color: "blue" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "blue",
                   },
-                  '&:hover fieldset': {
-                    borderColor: '#3f51b5',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "blue",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3f51b5',
+                },
+                "& .MuiInputLabel-root": {
+                  color: "blue",
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "blue",
+                },
+                marginBottom: 2,
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "16px",
+          }}
+        >
+          <Button onClick={handleClose2} color="error" variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleJoinProject}
+            color="primary"
+            variant="contained"
+          >
+            Join
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog for Creating a New Project */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "16px",
+            backgroundColor: "#f5f5f5",
+            boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
+            transition: "all 0.3s ease",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            color: "#3f51b5",
+            textAlign: "center",
+          }}
+        >
+          Create New Project
+        </DialogTitle>
+
+        <DialogContent>
+          <DialogContentText
+            sx={{
+              color: "black",
+              marginBottom: "16px",
+              fontSize: "1rem",
+              lineHeight: "1.5",
+            }}
+          >
+            To create a new project, please enter a project ID:
+          </DialogContentText>
+          <Box sx={{ width: 500, maxWidth: "100%" }}>
+            <TextField
+              label="Project ID"
+              fullWidth
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              sx={{
+                input: { color: "blue" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "blue",
                   },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "blue",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "blue",
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "blue",
+                },
+                marginBottom: 2,
+              }}
+            />
+            <TextField
+              label="Project Name"
+              fullWidth
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              sx={{
+                input: { color: "blue" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "blue",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "blue",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "blue",
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "blue",
+                },
+                marginBottom: 2,
+              }}
+            />
+            <TextField
+              label="Project Description"
+              fullWidth
+              value={projectDescription}
+              onChange={(e) => setProjectDescription(e.target.value)}
+              sx={{
+                input: { color: "blue" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "blue",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "blue",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "blue",
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "blue",
                 },
               }}
             />
-          </DialogContent>
-
-          <DialogActions
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '16px',
-            }}
+          </Box>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "16px",
+          }}
+        >
+          <Button onClick={handleClose} color="error" variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreateProject}
+            color="primary"
+            variant="contained"
           >
-            <Button onClick={handleClose} color="error" variant="outlined">
-              Cancel
-            </Button>
-            <Button onClick={handleClose} color="primary" variant="contained">
-              Create
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </React.Fragment>
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
