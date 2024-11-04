@@ -1,24 +1,48 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import Project from "./pages/Project";
-import HardwarePage from "./pages/HardwarePage";
-import BackgroundVideo from "./components/BackgroundVideo";
+// frontend/src/App.js
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import Projects from './components/Projects';
 
-const App = () => {
+function App() {
+  const [auth, setAuth] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setAuth(token);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setAuth(null);
+  };
+
   return (
     <Router>
-      {/* BackgroundVideo is placed outside Routes to ensure it stays across all pages */}
-      <BackgroundVideo />
       <Routes>
-        <Route path="/" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/projects" element={<Project />} />
-        <Route path="/hardware" element={<HardwarePage />} />
+        <Route 
+          path="/" 
+          element={
+            auth ? <Navigate to="/projects" replace /> : <Login setAuth={setAuth} />
+          } 
+        />
+        <Route 
+          path="/signup" 
+          element={<Signup />} 
+        />
+        <Route 
+          path="/projects" 
+          element={
+            auth ? <Projects auth={auth} handleLogout={handleLogout} /> : <Navigate to="/" replace />
+          } 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
-};
+}
 
 export default App;
