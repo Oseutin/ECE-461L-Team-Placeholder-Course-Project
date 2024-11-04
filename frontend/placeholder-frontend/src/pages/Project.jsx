@@ -14,28 +14,37 @@ import { useLocation, useNavigate } from "react-router-dom";
 export default function Project() {
   const location = useLocation();
   const user = location.state.user;
-  const [open, setOpen] = useState(false);
-  const [open2, setOpen2] = useState(false);
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [openJoinDialog, setOpenJoinDialog] = useState(false);
   const [projectId, setProjectId] = useState("");
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const navigate = useNavigate();
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const handleClickOpenCreate = () => {
+    setOpenCreateDialog(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleCloseCreate = () => {
+    setOpenCreateDialog(false);
+    resetFields();
   };
 
-  const handleClickOpen2 = () => {
-    setOpen2(true);
+  const handleClickOpenJoin = () => {
+    setOpenJoinDialog(true);
   };
 
-  const handleClose2 = () => {
-    setOpen2(false);
+  const handleCloseJoin = () => {
+    setOpenJoinDialog(false);
+    resetFields();
   };
+
+  const resetFields = () => {
+    setProjectId("");
+    setProjectName("");
+    setProjectDescription("");
+  };
+
   const handleCreateProject = async () => {
     try {
       const response = await fetch("/create_project", {
@@ -54,6 +63,7 @@ export default function Project() {
       });
       if (response.ok) {
         alert("Your project has been created successfully.");
+        handleCloseCreate();
       } else {
         alert("Project ID already exists. Please try a new ID.");
       }
@@ -61,6 +71,7 @@ export default function Project() {
       console.error("Error creating project:", error);
     }
   };
+
   const handleJoinProject = async () => {
     try {
       const response = await fetch("/join_project", {
@@ -75,15 +86,38 @@ export default function Project() {
       });
       if (response.ok) {
         alert("You have joined the project successfully.");
+        handleCloseJoin();
       } else {
-        alert("Project ID does not exist. Please try a new ID.");
+        alert(
+          "Project ID either does not exist or you have already joined it. Please try a new ID.",
+        );
       }
     } catch (error) {
-      console.error("Error creating project:", error);
+      console.error("Error joining project:", error);
     }
   };
+
   const handleOpenHardware = () => {
     navigate("/hardware", { state: { user: user } });
+  };
+
+  const inputStyles = {
+    input: { color: "blue" },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "blue",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "blue",
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color: "blue",
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "blue",
+    },
+    marginBottom: 2,
   };
 
   return (
@@ -96,15 +130,18 @@ export default function Project() {
         padding: 2,
       }}
     >
-      {/* Create and Join Project Buttons */}
       <Box sx={{ display: "flex", gap: 2 }}>
-        <Button variant="contained" color="primary" onClick={handleClickOpen}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleClickOpenCreate}
+        >
           Create Project
         </Button>
         <Button
           variant="contained"
           color="secondary"
-          onClick={handleClickOpen2}
+          onClick={handleClickOpenJoin}
         >
           Join Project
         </Button>
@@ -116,10 +153,10 @@ export default function Project() {
           View Hardware
         </Button>
       </Box>
-      {/* Dialog for Creating a New Project */}
+
       <Dialog
-        open={open2}
-        onClose={handleClose2}
+        open={openJoinDialog}
+        onClose={handleCloseJoin}
         maxWidth="sm"
         fullWidth
         sx={{
@@ -153,41 +190,16 @@ export default function Project() {
           >
             Please enter the Project ID you wish to join:
           </DialogContentText>
-          <Box sx={{ width: 500, maxWidth: "100%" }}>
-            <TextField
-              label="Project ID"
-              fullWidth
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
-              sx={{
-                input: { color: "blue" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "blue",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "blue",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: "blue",
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "blue",
-                },
-                marginBottom: 2,
-              }}
-            />
-          </Box>
+          <TextField
+            label="Project ID"
+            fullWidth
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+            sx={inputStyles}
+          />
         </DialogContent>
-        <DialogActions
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            padding: "16px",
-          }}
-        >
-          <Button onClick={handleClose2} color="error" variant="outlined">
+        <DialogActions sx={{ padding: "16px" }}>
+          <Button onClick={handleCloseJoin} color="error" variant="outlined">
             Cancel
           </Button>
           <Button
@@ -200,10 +212,9 @@ export default function Project() {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog for Creating a New Project */}
       <Dialog
-        open={open}
-        onClose={handleClose}
+        open={openCreateDialog}
+        onClose={handleCloseCreate}
         maxWidth="sm"
         fullWidth
         sx={{
@@ -235,90 +246,32 @@ export default function Project() {
               lineHeight: "1.5",
             }}
           >
-            To create a new project, please enter a project ID:
+            To create a new project, please enter the project details:
           </DialogContentText>
-          <Box sx={{ width: 500, maxWidth: "100%" }}>
-            <TextField
-              label="Project ID"
-              fullWidth
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
-              sx={{
-                input: { color: "blue" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "blue",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "blue",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: "blue",
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "blue",
-                },
-                marginBottom: 2,
-              }}
-            />
-            <TextField
-              label="Project Name"
-              fullWidth
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              sx={{
-                input: { color: "blue" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "blue",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "blue",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: "blue",
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "blue",
-                },
-                marginBottom: 2,
-              }}
-            />
-            <TextField
-              label="Project Description"
-              fullWidth
-              value={projectDescription}
-              onChange={(e) => setProjectDescription(e.target.value)}
-              sx={{
-                input: { color: "blue" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "blue",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "blue",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: "blue",
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "blue",
-                },
-              }}
-            />
-          </Box>
+          <TextField
+            label="Project ID"
+            fullWidth
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+            sx={inputStyles}
+          />
+          <TextField
+            label="Project Name"
+            fullWidth
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+            sx={inputStyles}
+          />
+          <TextField
+            label="Project Description"
+            fullWidth
+            value={projectDescription}
+            onChange={(e) => setProjectDescription(e.target.value)}
+            sx={inputStyles}
+          />
         </DialogContent>
-        <DialogActions
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            padding: "16px",
-          }}
-        >
-          <Button onClick={handleClose} color="error" variant="outlined">
+        <DialogActions sx={{ padding: "16px" }}>
+          <Button onClick={handleCloseCreate} color="error" variant="outlined">
             Cancel
           </Button>
           <Button

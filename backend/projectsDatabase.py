@@ -32,7 +32,7 @@ def createProject(client, projectName, projectId, description,username):
 
 # Function to add a user to a project
 def addUser(client, projectId, username):
-    db = client['projectDB']
+    db = client['projectsDB']
     project_collection = db['projects']
     result = project_collection.update_one(
         {'projectId': projectId},

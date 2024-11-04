@@ -104,6 +104,7 @@ def join_project():
         # Connect to MongoDB
         client = MongoClient(MONGODB_SERVER, server_api=ServerApi('1'))
         db = usersDatabase.usersDatabase(client)
+        projectsDatabase.addUser(client, project_id, username)
 
         # Attempt to join the project using the usersDatabase module
         user_exists = db.get_user(username)
@@ -113,6 +114,9 @@ def join_project():
         project_exists = projectsDatabase.queryProject(client, project_id)
         if not project_exists:
             return jsonify({'error': 'Project not found'}), 404
+
+
+
 
         # Join the project if not already a member
         join_success = db.join_project(username, project_id)
