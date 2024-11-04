@@ -24,7 +24,7 @@ def createProject(client, projectName, projectId, description,username):
         'projectId': projectId,
         'description': description,
         'hwSets': {},  # Hardware usage starts empty
-        'users': [username]    # No users at the start
+        'users': [username]   
     }
     project_collection.insert_one(project)
     print(f"Project '{projectName}' with ID '{projectId}' created successfully.")
