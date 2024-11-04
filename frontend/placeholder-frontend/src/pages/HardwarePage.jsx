@@ -1,76 +1,134 @@
-// src/components/HardwarePage.js
-
-import React from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Button,
-} from "@mui/material";
-
-// Sample hardware data
-const hardwareItems = [
-  {
-    id: 1,
-    name: "Graphics Card",
-    description: "High-performance graphics card for gaming and rendering.",
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    id: 2,
-    name: "Motherboard",
-    description: "Reliable motherboard with support for the latest processors.",
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    id: 3,
-    name: "SSD",
-    description: "Fast SSD for quick data access and storage.",
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    id: 4,
-    name: "RAM",
-    description: "High-speed RAM for optimal performance.",
-    imageUrl: "https://via.placeholder.com/150",
-  },
-];
+import { useState } from "react";
+import ProjectCard from "./ProjectCard";
+import { Container } from "@mui/material";
 
 const HardwarePage = () => {
+  const [projects, setProjects] = useState([
+    {
+      id: 1,
+      name: "Project Name 1",
+      hardware: [
+        { name: "HWSet1", checkedOut: 50, total: 100 },
+        { name: "HWSet2", checkedOut: 0, total: 100 },
+      ],
+      joined: false,
+    },
+    {
+      id: 2,
+      name: "Project Name 2",
+      hardware: [
+        { name: "HWSet1", checkedOut: 50, total: 100 },
+        { name: "HWSet2", checkedOut: 0, total: 100 },
+      ],
+      joined: true,
+    },
+    {
+      id: 3,
+      name: "Project Name 3",
+      hardware: [
+        { name: "HWSet1", checkedOut: 0, total: 100 },
+        { name: "HWSet2", checkedOut: 0, total: 100 },
+      ],
+      joined: false,
+    },
+  ]);
+
+  const toggleJoinProject = async (projectId) => {
+    const project = projects.find((p) => p.id === projectId);
+    const url = project.joined ? `/leave/${projectId}` : `/join/${projectId}`;
+
+    try {
+      const response = await fetch(url, { method: "POST" });
+      const data = await response.json();
+      alert(data.message);
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.id === projectId
+            ? { ...project, joined: !project.joined }
+            : project,
+        ),
+      );
+    } catch (error) {
+      console.error("Error toggling project join status:", error);
+    }
+  };
+
+  const handleCheckIn = async (projectId, hardwareIndex, quantity) => {
+    try {
+      const response = await fetch(`/checkin/${projectId}/${quantity}`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      alert(data.message);
+
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.id === projectId
+            ? {
+                ...project,
+                hardware: project.hardware.map((hwSet, index) =>
+                  index === hardwareIndex
+                    ? {
+                        ...hwSet,
+                        checkedOut: Math.min(
+                          hwSet.checkedOut + quantity,
+                          hwSet.total,
+                        ),
+                      }
+                    : hwSet,
+                ),
+              }
+            : project,
+        ),
+      );
+    } catch (error) {
+      console.error("Error checking in hardware:", error);
+    }
+  };
+
+  const handleCheckOut = async (projectId, hardwareIndex, quantity) => {
+    try {
+      const response = await fetch(`/checkout/${projectId}/${quantity}`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      alert(data.message);
+
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.id === projectId
+            ? {
+                ...project,
+                hardware: project.hardware.map((hwSet, index) =>
+                  index === hardwareIndex
+                    ? {
+                        ...hwSet,
+                        checkedOut: Math.max(hwSet.checkedOut - quantity, 0),
+                      }
+                    : hwSet,
+                ),
+              }
+            : project,
+        ),
+      );
+    } catch (error) {
+      console.error("Error checking out hardware:", error);
+    }
+  };
+
   return (
-    <Box sx={{ padding: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Hardware List
-      </Typography>
-      <Grid container spacing={2}>
-        {hardwareItems.map((item) => (
-          <Grid item xs={12} sm={6} md={4} key={item.id}>
-            <Card>
-              <CardMedia
-                component="img"
-                height="140"
-                image={item.imageUrl}
-                alt={item.name}
-              />
-              <CardContent>
-                <Typography variant="h5" component="div">
-                  {item.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {item.description}
-                </Typography>
-                <Button variant="contained" color="primary" sx={{ mt: 2 }}>
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
+    <Container>
+      <h1>Projects</h1>
+      {projects.map((project) => (
+        <ProjectCard
+          key={project.id}
+          project={project}
+          onToggleJoin={toggleJoinProject}
+          onCheckIn={handleCheckIn}
+          onCheckOut={handleCheckOut}
+        />
+      ))}
+    </Container>
   );
 };
 

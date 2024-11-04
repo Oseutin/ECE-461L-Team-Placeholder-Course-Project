@@ -53,7 +53,7 @@ export default function Project() {
         }),
       });
       if (response.ok) {
-        navigate("/hardware");
+        alert("Your project has been created successfully.");
       } else {
         alert("Project ID already exists. Please try a new ID.");
       }
@@ -74,13 +74,16 @@ export default function Project() {
         }),
       });
       if (response.ok) {
-        navigate("/hardware");
+        alert("You have joined the project successfully.");
       } else {
         alert("Project ID does not exist. Please try a new ID.");
       }
     } catch (error) {
       console.error("Error creating project:", error);
     }
+  };
+  const handleOpenHardware = () => {
+    navigate("/hardware", { state: { user: user } });
   };
 
   return (
@@ -104,6 +107,13 @@ export default function Project() {
           onClick={handleClickOpen2}
         >
           Join Project
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleOpenHardware}
+        >
+          View Hardware
         </Button>
       </Box>
       {/* Dialog for Creating a New Project */}
