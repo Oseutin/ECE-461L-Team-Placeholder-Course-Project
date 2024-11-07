@@ -31,7 +31,7 @@ function HardwareSet({ hardwareSetId, setName, availability, maxCapacity, isAuth
       setQuantity('');
       refreshProjects();
     } catch (error) {
-      const errorMsg = error.msg || 'Failed to check in hardware.';
+      const errorMsg = error.message || 'Failed to check in hardware.';
       setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
   };
@@ -55,7 +55,7 @@ function HardwareSet({ hardwareSetId, setName, availability, maxCapacity, isAuth
       setQuantity('');
       refreshProjects();
     } catch (error) {
-      const errorMsg = error.msg || 'Failed to check out hardware.';
+      const errorMsg = error.message || 'Failed to check out hardware.';
       setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
   };
@@ -76,7 +76,7 @@ function HardwareSet({ hardwareSetId, setName, availability, maxCapacity, isAuth
           type="number"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
-          onFocus={() => setQuantity('')} // Clears the input on focus
+          onFocus={() => setQuantity('')}
           disabled={!isAuthorized}
           style={{ marginRight: '16px' }}
           InputProps={{ inputProps: { min: 0 } }}

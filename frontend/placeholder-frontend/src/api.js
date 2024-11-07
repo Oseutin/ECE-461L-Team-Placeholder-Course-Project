@@ -1,7 +1,7 @@
 // frontend/src/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 /**
  * Checks in hardware.
@@ -57,7 +57,7 @@ export const checkOutHardware = async (projectId, qty, hardwareSetId, auth) => {
  */
 export const joinProject = async (projectId, auth) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/join/${projectId}`, {}, {
+    const response = await axios.post(`${API_BASE_URL}/join_project`, { id: projectId }, {
       headers: {
         'Authorization': `Bearer ${auth}`
       }
@@ -76,12 +76,30 @@ export const joinProject = async (projectId, auth) => {
  */
 export const leaveProject = async (projectId, auth) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/leave/${projectId}`, {}, {
+    const response = await axios.post(`${API_BASE_URL}/leave_project`, { id: projectId }, {
       headers: {
         'Authorization': `Bearer ${auth}`
       }
     });
     return response.data.message;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Network error');
+  }
+};
+
+/**
+ * Fetches inventory and project data.
+ * @param {string} auth 
+ * @returns {Promise<Object>} Projects and user inventory data.
+ */
+export const fetchInventory = async (auth) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/inventory`, {
+      headers: {
+        'Authorization': `Bearer ${auth}`
+      }
+    });
+    return response.data;
   } catch (error) {
     throw error.response ? error.response.data : new Error('Network error');
   }

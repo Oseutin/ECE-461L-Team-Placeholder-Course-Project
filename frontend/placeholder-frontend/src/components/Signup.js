@@ -23,24 +23,28 @@ function Signup() {
       setSnackbar({ open: true, message: 'Please fill out all fields.', severity: 'error' });
       return;
     }
-
+  
     if (password !== confirmPassword) {
       setSnackbar({ open: true, message: 'Passwords do not match.', severity: 'error' });
       return;
     }
-
+  
     try {
-      await axios.post('http://localhost:5000/api/signup', {
+      // Use environment variable for API URL
+      await axios.post(`${process.env.REACT_APP_API_URL}/add_user`, {
         username,
         password
       });
+  
       setSnackbar({ open: true, message: 'Signup successful! Redirecting to login...', severity: 'success' });
+  
+      // Redirect to login after a delay
       setTimeout(() => navigate('/'), 3000);
     } catch (error) {
       const errorMsg = error.response?.data?.msg || 'Signup failed: An unexpected error occurred.';
       setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
-  };
+  };  
 
   const handleSubmit = (e) => {
     e.preventDefault();

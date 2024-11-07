@@ -22,13 +22,24 @@ function Projects({ auth, handleLogout }) {
 
   const fetchProjects = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/projects', {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/inventory`, {
         headers: {
-          'Authorization': `Bearer ${auth}`
+          Authorization: `Bearer ${auth}`
         }
       });
-      setProjectData(response.data.projects);
-      setUserInventory(response.data.userInventory);
+
+      // Handle project data structure and guard against undefined
+      const projectsArray = response.data.projects || [];
+      const inventory = response.data.userInventory || {};
+
+      // Convert projects array to an object with project IDs as keys for easier lookup
+      const projectsObject = projectsArray.reduce((acc, project) => {
+        acc[project.projectId] = project;
+        return acc;
+      }, {});
+
+      setProjectData(projectsObject);
+      setUserInventory(inventory);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -59,16 +70,16 @@ function Projects({ auth, handleLogout }) {
   const handleJoinProjectSubmit = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/join_project',
-        { projectId: newProjectId },
+        `${process.env.REACT_APP_API_URL}/join_project`,
+        { user_id: auth, id: newProjectId },
         {
           headers: {
-            'Authorization': `Bearer ${auth}`
+            Authorization: `Bearer ${auth}`
           }
         }
       );
-      setSnackbar({ open: true, message: response.data.msg, severity: 'success' });
-      fetchProjects(); // Refresh project list
+      setSnackbar({ open: true, message: response.data.message, severity: 'success' });
+      fetchProjects();
       handleJoinProjectClose();
     } catch (error) {
       const errorMsg = error.response?.data?.msg || 'Failed to join project.';
@@ -88,16 +99,19 @@ function Projects({ auth, handleLogout }) {
   const handleCreateProjectSubmit = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/create_project',
-        { ...newProject },
+        `${process.env.REACT_APP_API_URL}/create_project`,
+        {
+          user_id: auth,
+          project_data: { id: newProject.id, name: newProject.name, description: newProject.description }
+        },
         {
           headers: {
-            'Authorization': `Bearer ${auth}`
+            Authorization: `Bearer ${auth}`
           }
         }
       );
-      setSnackbar({ open: true, message: response.data.msg, severity: 'success' });
-      fetchProjects(); // Refresh project list
+      setSnackbar({ open: true, message: response.data.message, severity: 'success' });
+      fetchProjects();
       handleCreateProjectClose();
     } catch (error) {
       const errorMsg = error.response?.data?.msg || 'Failed to create project.';
@@ -121,7 +135,6 @@ function Projects({ auth, handleLogout }) {
         </Button>
       </Box>
       
-      {/* Display user inventory for authorized projects */}
       <Box marginBottom="20px">
         <Typography variant="h5" gutterBottom>Your Hardware Inventory</Typography>
         {Object.entries(userInventory).map(([projectId, hardwareSets]) => {
@@ -132,7 +145,7 @@ function Projects({ auth, handleLogout }) {
             <Card key={projectId} style={{ marginBottom: '15px' }}>
               <CardContent>
                 <Typography variant="h6">
-                  {project.name} <span style={{ fontSize: '0.8em', color: 'gray' }}> (ID: {projectId})</span>
+                  {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (ID: {projectId})</span>
                 </Typography>
                 <Typography variant="body2" color="textSecondary" style={{ marginTop: '5px', marginBottom: '10px' }}>
                   {project.description}
@@ -150,7 +163,6 @@ function Projects({ auth, handleLogout }) {
         })}
       </Box>
 
-      {/* Heading for Project Library */}
       <Typography variant="h5" gutterBottom>Your Project Library</Typography>
 
       {loading ? (
@@ -161,13 +173,12 @@ function Projects({ auth, handleLogout }) {
         <Typography variant="h6">No authorized projects available.</Typography>
       ) : (
         Object.values(projectData)
-          .filter((project) => project.isAuthorized) // Show only authorized projects
+          .filter((project) => project.users?.includes(auth))
           .map((project) => (
-            <Project key={project.id} project={project} auth={auth} refreshProjects={fetchProjects} />
+            <Project key={project.projectId} project={project} auth={auth} refreshProjects={fetchProjects} />
           ))
       )}
 
-      {/* Buttons to join or create a new project, stacked vertically */}
       <Box display="flex" flexDirection="column" alignItems="center" marginTop="20px">
         <Button variant="contained" color="primary" onClick={handleJoinProjectOpen} style={{ marginBottom: '10px' }}>
           Join Existing Project
@@ -177,7 +188,6 @@ function Projects({ auth, handleLogout }) {
         </Button>
       </Box>
 
-      {/* Dialog for joining an existing project */}
       <Dialog open={joinDialogOpen} onClose={handleJoinProjectClose}>
         <DialogTitle>Join Existing Project</DialogTitle>
         <DialogContent>
@@ -205,7 +215,6 @@ function Projects({ auth, handleLogout }) {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog for creating a new project */}
       <Dialog open={createDialogOpen} onClose={handleCreateProjectClose}>
         <DialogTitle>Create New Project</DialogTitle>
         <DialogContent>

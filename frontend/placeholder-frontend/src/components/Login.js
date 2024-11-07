@@ -21,22 +21,27 @@ function Login({ setAuth }) {
       setSnackbar({ open: true, message: 'Please enter both username and password.', severity: 'error' });
       return;
     }
-
+  
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      // Use environment variable for API URL
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/login`, {
         username,
         password
       });
-
+  
       const { access_token } = response.data;
-      localStorage.setItem('token', access_token);
-      setAuth(access_token);
-      navigate('/projects');
+      if (access_token) {
+        localStorage.setItem('token', access_token);
+        setAuth(access_token);
+        navigate('/projects');
+      } else {
+        throw new Error("Login failed: No token received.");
+      }
     } catch (error) {
       const errorMsg = error.response?.data?.msg || 'Login failed: An unexpected error occurred.';
       setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
-  };
+  };  
 
   const handleSubmit = (e) => {
     e.preventDefault();

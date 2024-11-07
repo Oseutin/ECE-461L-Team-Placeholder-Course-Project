@@ -24,7 +24,7 @@ function JoinLeaveButton({ isAuthorized, projectId, auth, refreshProjects }) {
       setSnackbar({ open: true, message, severity: 'success' });
       refreshProjects();
     } catch (error) {
-      const errorMsg = error.msg || 'Action failed.';
+      const errorMsg = error.message || 'Action failed.';
       setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
   };
