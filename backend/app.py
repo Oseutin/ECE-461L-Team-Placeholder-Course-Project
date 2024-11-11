@@ -180,6 +180,72 @@ def join_project():
         else:
             return jsonify({'msg': 'User is already a member of the project or an error occurred'}), 400
 
+@app.route('/hardware_sets/<project_id>', methods=['GET'])
+def get_hardware_sets(project_id):
+    # Verify the JWT token
+    token = request.headers.get('Authorization', '').split(' ')[1]
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({'msg': 'Unauthorized access'}), 401
+
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        hardware_db = hardwareDatabase.hardwareDatabase(client)
+        
+        # Fetch the hardware sets for this project
+        hardware_sets = hardware_db.get_hardware_for_project(project_id)
+        
+    return jsonify({"hardwareSets": hardware_sets}), 200
+
+@app.route('/projects/<project_id>/checkout', methods=['POST'])
+def checkout_hardware(project_id):
+    from hardwareDatabase import hardwareDatabase
+    # Verify JWT token
+    token = request.headers.get('Authorization', '').split(' ')[1]
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({'msg': 'Unauthorized access'}), 401
+
+    data = request.get_json()
+    hw_name = data.get('hw_name')
+    qty = data.get('quantity')
+
+    if not hw_name or qty is None:
+        return jsonify({'msg': 'Hardware name and quantity are required'}), 400
+
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        hardware_db = hardwareDatabase(client)
+
+        # Request space in the specified hardware set for this project
+        if hardware_db.request_space(hw_name, qty):
+            return jsonify({'msg': f'{qty} units of {hw_name} checked out successfully', 'new_availability': hardware_db.get_available_capacity(hw_name)}), 200
+        else:
+            return jsonify({'msg': f'Insufficient availability in {hw_name}', 'new_availability': hardware_db.get_available_capacity(hw_name)}), 400
+
+@app.route('/projects/<project_id>/checkin', methods=['POST'])
+def checkin_hardware(project_id):
+    from hardwareDatabase import hardwareDatabase
+    # Verify JWT token
+    token = request.headers.get('Authorization', '').split(' ')[1]
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({'msg': 'Unauthorized access'}), 401
+
+    data = request.get_json()
+    hw_name = data.get('hw_name')
+    qty = data.get('quantity')
+
+    if not hw_name or qty is None:
+        return jsonify({'msg': 'Hardware name and quantity are required'}), 400
+
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        hardware_db = hardwareDatabase(client)
+
+        # Return space in the specified hardware set for this project
+        if hardware_db.return_space(hw_name, qty):
+            return jsonify({'msg': f'{qty} units of {hw_name} checked in successfully', 'new_availability': hardware_db.get_available_capacity(hw_name)}), 200
+        else:
+            return jsonify({'msg': 'Failed to check in hardware'}), 400
+
 # Main entry point
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)

@@ -4,17 +4,18 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 /**
- * Checks in hardware.
- * @param {number} projectId 
+ * Check out hardware for a project.
+ * @param {string} projectId 
  * @param {number} qty 
- * @param {string} hardwareSetId 
+ * @param {string} hwName 
  * @param {string} auth 
- * @returns {Promise<Object>} Message and newAvailability.
+ * @returns {Promise<Object>} Message and new availability.
  */
-export const checkInHardware = async (projectId, qty, hardwareSetId, auth) => {
+export const checkOutHardware = async (projectId, qty, hwName, auth) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/checkin/${projectId}/${qty}`, {
-      hardwareSetId
+    const response = await axios.post(`${API_BASE_URL}/projects/${projectId}/checkout`, {
+      hw_name: hwName,
+      quantity: qty,
     }, {
       headers: {
         'Authorization': `Bearer ${auth}`
@@ -27,20 +28,22 @@ export const checkInHardware = async (projectId, qty, hardwareSetId, auth) => {
 };
 
 /**
- * Checks out hardware.
- * @param {number} projectId 
+ * Check in hardware for a project.
+ * @param {string} projectId 
  * @param {number} qty 
- * @param {string} hardwareSetId 
+ * @param {string} hwName 
  * @param {string} auth 
- * @returns {Promise<Object>} Message, newAvailability, and checkedOutQty.
+ * @returns {Promise<Object>} Message and new availability.
  */
-export const checkOutHardware = async (projectId, qty, hardwareSetId, auth) => {
+export const checkInHardware = async (projectId, qty, hwName, auth) => {
+  const token = localStorage.getItem('token');
   try {
-    const response = await axios.post(`${API_BASE_URL}/checkout/${projectId}/${qty}`, {
-      hardwareSetId
+    const response = await axios.post(`${API_BASE_URL}/projects/${projectId}/checkin`, {
+      hw_name: hwName,
+      quantity: qty,
     }, {
       headers: {
-        'Authorization': `Bearer ${auth}`
+        'Authorization': `Bearer ${token}`
       }
     });
     return response.data;
@@ -56,10 +59,11 @@ export const checkOutHardware = async (projectId, qty, hardwareSetId, auth) => {
  * @returns {Promise<string>} Message from backend.
  */
 export const joinProject = async (projectId, auth) => {
+  const token = localStorage.getItem('token');
   try {
     const response = await axios.post(`${API_BASE_URL}/join_project`, { id: projectId }, {
       headers: {
-        'Authorization': `Bearer ${auth}`
+        'Authorization': `Bearer ${token}`
       }
     });
     return response.data.message;
