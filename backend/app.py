@@ -198,13 +198,13 @@ def get_hardware_sets(project_id):
 
 @app.route('/projects/<project_id>/checkout', methods=['POST'])
 def checkout_hardware(project_id):
-    from hardwareDatabase import hardwareDatabase
     # Verify JWT token
     token = request.headers.get('Authorization', '').split(' ')[1]
     user_data = verify_token(token)
     if not user_data:
         return jsonify({'msg': 'Unauthorized access'}), 401
 
+    username = user_data.get('username')
     data = request.get_json()
     hw_name = data.get('hw_name')
     qty = data.get('quantity')
@@ -213,13 +213,13 @@ def checkout_hardware(project_id):
         return jsonify({'msg': 'Hardware name and quantity are required'}), 400
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
-        hardware_db = hardwareDatabase(client)
+        user_db = usersDatabase(client)
 
-        # Request space in the specified hardware set for this project
-        if hardware_db.request_space(hw_name, qty):
-            return jsonify({'msg': f'{qty} units of {hw_name} checked out successfully', 'new_availability': hardware_db.get_available_capacity(hw_name)}), 200
+         # Check out hardware from user's project
+        if user_db.check_out_hardware(username, project_id, hw_name, qty):
+            return jsonify({'msg': f'{qty} units of {hw_name} checked out successfully'}), 200
         else:
-            return jsonify({'msg': f'Insufficient availability in {hw_name}', 'new_availability': hardware_db.get_available_capacity(hw_name)}), 400
+            return jsonify({'msg': f'Unable to check out {hw_name}. Ensure sufficient hardware is available.'}), 400
 
 @app.route('/projects/<project_id>/checkin', methods=['POST'])
 def checkin_hardware(project_id):
@@ -230,6 +230,7 @@ def checkin_hardware(project_id):
     if not user_data:
         return jsonify({'msg': 'Unauthorized access'}), 401
 
+    username = user_data.get('username')
     data = request.get_json()
     hw_name = data.get('hw_name')
     qty = data.get('quantity')
@@ -238,11 +239,11 @@ def checkin_hardware(project_id):
         return jsonify({'msg': 'Hardware name and quantity are required'}), 400
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
-        hardware_db = hardwareDatabase(client)
+        user_db = usersDatabase(client)
 
-        # Return space in the specified hardware set for this project
-        if hardware_db.return_space(hw_name, qty):
-            return jsonify({'msg': f'{qty} units of {hw_name} checked in successfully', 'new_availability': hardware_db.get_available_capacity(hw_name)}), 200
+        # Check in hardware to user's project
+        if user_db.check_in_hardware(username, project_id, hw_name, qty):
+            return jsonify({'msg': f'{qty} units of {hw_name} checked in successfully'}), 200
         else:
             return jsonify({'msg': 'Failed to check in hardware'}), 400
 
