@@ -5,7 +5,7 @@ import { Container, Typography, Button, Box, CircularProgress, Snackbar, Alert, 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function Projects({ auth, handleLogout }) {
+function Projects({ token, handleLogout }) {
   const [projectData, setProjectData] = useState({});
   const [userInventory, setUserInventory] = useState({});
   const [loading, setLoading] = useState(true);
@@ -21,16 +21,18 @@ function Projects({ auth, handleLogout }) {
   };
 
   const fetchProjects = async () => {
+    const token = localStorage.getItem('token');
+
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/inventory`, {
         headers: {
-          Authorization: `Bearer ${auth}`
+          Authorization: `Bearer ${token}`
         }
       });
 
       // Handle project data structure and guard against undefined
       const projectsArray = response.data.projects || [];
-      const inventory = response.data.userInventory || {};
+      const userInventory = response.data.userInventory || {};
 
       // Convert projects array to an object with project IDs as keys for easier lookup
       const projectsObject = projectsArray.reduce((acc, project) => {
@@ -38,8 +40,11 @@ function Projects({ auth, handleLogout }) {
         return acc;
       }, {});
 
+      console.log("Fetched Project Data:", projectsObject);
+      console.log("Fetched User Inventory:", userInventory);
+
       setProjectData(projectsObject);
-      setUserInventory(inventory);
+      setUserInventory(userInventory);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -51,7 +56,7 @@ function Projects({ auth, handleLogout }) {
   useEffect(() => {
     fetchProjects();
     // eslint-disable-next-line
-  }, [auth]);
+  }, [token]);
 
   const handleLogoutClick = () => {
     handleLogout();
@@ -68,13 +73,15 @@ function Projects({ auth, handleLogout }) {
   };
 
   const handleJoinProjectSubmit = async () => {
+    const token = localStorage.getItem('token');
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/join_project`,
-        { user_id: auth, id: newProjectId },
+        { user_id: token, id: newProjectId },
         {
           headers: {
-            Authorization: `Bearer ${auth}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -97,16 +104,18 @@ function Projects({ auth, handleLogout }) {
   };
 
   const handleCreateProjectSubmit = async () => {
+    const token = localStorage.getItem('token');
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/create_project`,
         {
-          user_id: auth,
+          user_id: token,
           project_data: { id: newProject.id, name: newProject.name, description: newProject.description }
         },
         {
           headers: {
-            Authorization: `Bearer ${auth}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -139,7 +148,7 @@ function Projects({ auth, handleLogout }) {
         <Typography variant="h5" gutterBottom>Your Hardware Inventory</Typography>
         {Object.entries(userInventory).map(([projectId, hardwareSets]) => {
           const project = projectData[projectId];
-          if (!project) return null;
+          // if (!project) return null;
 
           return (
             <Card key={projectId} style={{ marginBottom: '15px' }}>
@@ -172,10 +181,13 @@ function Projects({ auth, handleLogout }) {
       ) : Object.keys(projectData).length === 0 ? (
         <Typography variant="h6">No authorized projects available.</Typography>
       ) : (
-        Object.values(projectData)
-          .filter((project) => project.users?.includes(auth))
-          .map((project) => (
-            <Project key={project.projectId} project={project} auth={auth} refreshProjects={fetchProjects} />
+        Object.values(projectData).map((project) => (
+          <Project
+            key={project.projectId}
+            project={project}
+            token={token}
+            refreshProjects={fetchProjects}
+          />
           ))
       )}
 

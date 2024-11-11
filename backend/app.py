@@ -18,7 +18,7 @@ app = Flask(__name__)
 Swagger(app)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
-SECRET_KEY = "your_secret_key"
+SECRET_KEY = "VerySecret"
 
 # Utility to verify JWT token
 def verify_token(token):
@@ -141,7 +141,7 @@ def fetch_inventory():
         hardware_db = hardwareDatabase.hardwareDatabase(client)
 
         # Fetch all projects
-        projects = project_db.get_all_projects()
+        projects = project_db.get_projects_by_user(username)
         
         # Retrieve hardware inventory specific to the user
         user_inventory = hardware_db.get_user_hardware(username, projects)
