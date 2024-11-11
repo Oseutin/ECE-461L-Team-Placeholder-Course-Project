@@ -116,14 +116,17 @@ def create_project():
         project_db = projectsDatabase.projectsDatabase(client)
         user_db = usersDatabase(client)
 
+        # Check if user exists
         user = user_db.get_user(username)
         if not user:
             return jsonify({'msg': 'User not found'}), 404
 
-        if not project_db.create_project(project_name, project_id, description, username):
+        # Create the project with independent HWSet1 and HWSet2 with 100 availability each
+        if not project_db.create_project(project_name, project_id, description, username, initial_hardware={'HWSet1': 100, 'HWSet2': 100}):
             return jsonify({"msg": "Project ID already exists"}), 400
 
-        user_db.add_project_to_user(username, project_id)
+        # Add the project to the user's projects list with zeroed-out hardware sets
+        user_db.add_project_to_user(username, project_id, initial_hardware={'HWSet1': 0, 'HWSet2': 0})
 
     return jsonify({"msg": "Project created and added to user successfully"}), 200
 
@@ -175,10 +178,115 @@ def join_project():
             return jsonify({'msg': 'User not found'}), 404
 
         if project_db.add_user(project_id, username):
-            user_db.add_project_to_user(username, project_id)
+            user_db.add_project_to_user(username, project_id, initial_hardware={'HWSet1': 0, 'HWSet2': 0})
             return jsonify({'msg': f'User {username} joined project {project_id} successfully'}), 200
         else:
             return jsonify({'msg': 'User is already a member of the project or an error occurred'}), 400
+
+# Route to fetch hardware sets for a specific project
+app.route('/hardware_sets/<project_id>', methods=['GET', 'OPTIONS'])
+def fetch_hardware_sets(project_id):
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'OK'}), 200
+    
+    token = request.headers.get('Authorization', '').split(' ')[1]
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({'msg': 'Unauthorized access'}), 401
+    
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        project_db = projectsDatabase.projectsDatabase(client)
+        
+        project = project_db.query_project(project_id)
+        if not project:
+            return jsonify({'msg': 'Project not found'}), 404
+        
+        hardware_availability = project.get('hardwareAvailability', {})
+        
+    return jsonify({
+        'projectId': project_id,
+        'hardwareSets': [
+            {'hwName': 'HWSet1', 'available_capacity': hardware_availability.get('HWSet1', 0), 'total_capacity': 100},
+            {'hwName': 'HWSet2', 'available_capacity': hardware_availability.get('HWSet2', 0), 'total_capacity': 100}
+        ]
+    }), 200
+
+# Route for checking out hardware
+@app.route('/projects/<project_id>/checkout', methods=['POST'])
+def checkout_hardware(project_id):
+    # Verify JWT token
+    token = request.headers.get('Authorization', '').split(' ')[1]
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({'msg': 'Unauthorized access'}), 401
+
+    username = user_data.get('username')
+    request_data = request.get_json()
+    hw_set_name = request_data.get('hw_set_name')
+    quantity = int(request_data.get('quantity'))
+
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        project_db = projectsDatabase.projectsDatabase(client)
+        user_db = usersDatabase(client)
+
+        # Retrieve project data to check hardware availability
+        project = project_db.query_project(project_id)
+        if not project:
+            return jsonify({'msg': 'Project not found'}), 404
+
+        available_qty = project['hardwareAvailability'].get(hw_set_name, 0)
+
+        # Check if enough hardware is available
+        if quantity > available_qty:
+            return jsonify({'msg': f'Not enough {hw_set_name} available'}), 400
+
+        # Deduct quantity from project's availability and update in DB
+        new_project_qty = available_qty - quantity
+        project_db.update_hardware_availability(project_id, hw_set_name, new_project_qty)
+
+        # Update user’s record with the checked-out quantity for this hardware set
+        user_db.update_user_hardware(username, project_id, hw_set_name, quantity, operation='checkout')
+
+    return jsonify({'msg': f'Checked out {quantity} of {hw_set_name}', 'newAvailability': new_project_qty}), 200
+
+# Route for checking in hardware
+@app.route('/projects/<project_id>/checkin', methods=['POST'])
+def checkin_hardware(project_id):
+    # Verify JWT token
+    token = request.headers.get('Authorization', '').split(' ')[1]
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({'msg': 'Unauthorized access'}), 401
+
+    username = user_data.get('username')
+    request_data = request.get_json()
+    hw_set_name = request_data.get('hw_set_name')
+    quantity = int(request_data.get('quantity'))
+
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        project_db = projectsDatabase.projectsDatabase(client)
+        user_db = usersDatabase(client)
+
+        # Retrieve project data to update hardware availability
+        project = project_db.query_project(project_id)
+        if not project:
+            return jsonify({'msg': 'Project not found'}), 404
+
+        # Retrieve user’s checked-out hardware quantity for validation
+        user_hardware_qty = user_db.get_user_hardware_quantity(username, project_id, hw_set_name)
+
+        # Ensure the user has checked out enough to return the specified quantity
+        if quantity > user_hardware_qty:
+            return jsonify({'msg': f'Cannot return more than checked out: {user_hardware_qty} available to return'}), 400
+
+        # Add quantity back to project's availability and update in DB
+        new_project_qty = project['hardwareAvailability'].get(hw_set_name, 0) + quantity
+        project_db.update_hardware_availability(project_id, hw_set_name, new_project_qty)
+
+        # Update user’s record by deducting the returned quantity
+        user_db.update_user_hardware(username, project_id, hw_set_name, quantity, operation='checkin')
+
+    return jsonify({'msg': f'Checked in {quantity} of {hw_set_name}', 'newAvailability': new_project_qty}), 200
 
 # Main entry point
 if __name__ == '__main__':

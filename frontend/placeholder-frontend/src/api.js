@@ -3,51 +3,42 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-/**
- * Checks in hardware.
- * @param {number} projectId 
- * @param {number} qty 
- * @param {string} hardwareSetId 
- * @param {string} auth 
- * @returns {Promise<Object>} Message and newAvailability.
- */
-export const checkInHardware = async (projectId, qty, hardwareSetId, auth) => {
+export const checkInHardware = async (projectId, quantity, hardwareSet, token) => {
+  token = localStorage.getItem('token');
   try {
-    const response = await axios.post(`${API_BASE_URL}/checkin/${projectId}/${qty}`, {
-      hardwareSetId
-    }, {
-      headers: {
-        'Authorization': `Bearer ${auth}`
-      }
-    });
-    return response.data;
+      const response = await axios.post(
+          `${API_BASE_URL}/projects/${projectId}/checkin`,
+          { hardwareSet, quantity },
+          {
+              headers: {
+                  'Authorization': `Bearer ${token}`
+              }
+          }
+      );
+      return response.data;
   } catch (error) {
-    throw error.response ? error.response.data : new Error('Network error');
+      throw error.response ? error.response.data : new Error('Network error');
   }
 };
 
-/**
- * Checks out hardware.
- * @param {number} projectId 
- * @param {number} qty 
- * @param {string} hardwareSetId 
- * @param {string} auth 
- * @returns {Promise<Object>} Message, newAvailability, and checkedOutQty.
- */
-export const checkOutHardware = async (projectId, qty, hardwareSetId, auth) => {
+export const checkOutHardware = async (projectId, quantity, hardwareSet, token) => {
+  token = localStorage.getItem('token');
   try {
-    const response = await axios.post(`${API_BASE_URL}/checkout/${projectId}/${qty}`, {
-      hardwareSetId
-    }, {
-      headers: {
-        'Authorization': `Bearer ${auth}`
-      }
-    });
-    return response.data;
+      const response = await axios.post(
+          `${API_BASE_URL}/projects/${projectId}/checkout`,
+          { hardwareSet, quantity },
+          {
+              headers: {
+                  'Authorization': `Bearer ${token}`
+              }
+          }
+      );
+      return response.data;
   } catch (error) {
-    throw error.response ? error.response.data : new Error('Network error');
+      throw error.response ? error.response.data : new Error('Network error');
   }
 };
+
 
 /**
  * Joins a project.

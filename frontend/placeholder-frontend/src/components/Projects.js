@@ -133,6 +133,21 @@ function Projects({ token, handleLogout }) {
     setNewProject((prev) => ({ ...prev, [name]: value }));
   };
 
+  const fetchHardwareSets = async (projectId) => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/hardware_sets/${projectId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data.hardwareSets;
+    } catch (error) {
+        console.error('Error fetching hardware sets:', error);
+        return [];
+    }
+  }; 
+
   return (
     <Container maxWidth="md" style={{ marginTop: '40px' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="20px">
@@ -187,6 +202,7 @@ function Projects({ token, handleLogout }) {
             project={project}
             token={token}
             refreshProjects={fetchProjects}
+            fetchHardwareSets={fetchHardwareSets}
           />
           ))
       )}

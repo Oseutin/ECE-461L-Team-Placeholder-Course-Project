@@ -68,3 +68,17 @@ class hardwareDatabase:
                 print(f"Unexpected project structure: {project}")  # Debugging line
 
         return user_inventory
+    
+    def get_hardware_for_project(self, project_id):
+        return [
+            {
+                "hwName": "HWset1",
+                "total_capacity": 100,
+                "available_capacity": self.get_available_capacity("HWset1")
+            },
+            {
+                "hwName": "HWset2",
+                "total_capacity": 100,
+                "available_capacity": self.get_available_capacity("HWset2")
+            }
+        ]
