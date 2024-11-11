@@ -184,7 +184,7 @@ def join_project():
             return jsonify({'msg': 'User is already a member of the project or an error occurred'}), 400
 
 # Route to fetch hardware sets for a specific project
-app.route('/hardware_sets/<project_id>', methods=['GET', 'OPTIONS'])
+@app.route('/hardware_sets/<project_id>', methods=['GET', 'OPTIONS'])
 def fetch_hardware_sets(project_id):
     if request.method == 'OPTIONS':
         return jsonify({'status': 'OK'}), 200
