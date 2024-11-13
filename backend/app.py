@@ -189,9 +189,10 @@ def get_hardware_sets(project_id):
         return jsonify({'msg': 'Unauthorized access'}), 401
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+
         hardware_db = hardwareDatabase.hardwareDatabase(client)
         
-        hardware_sets = hardware_db.get_hardware_for_project(project_id)
+        hardware_sets = hardware_db.get_hardware_for_project()
         
     return jsonify({"hardwareSets": hardware_sets}), 200
 
@@ -212,11 +213,19 @@ def checkout_hardware(project_id):
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         project_db = projectsDatabase.projectsDatabase(client)
+        hardware_db = hardwareDatabase.hardwareDatabase(client)
 
-        if project_db.check_out(project_id, hw_set, qty):
-            return jsonify({'msg': f'{qty} units checked out successfully for project {project_id}'}), 200
+        validAmt, amt = hardware_db.request_space(hw_set, qty)
+        if validAmt:
+            if project_db.check_out(project_id, hw_set, amt):
+                return jsonify({'msg': f'{amt} units checked out successfully for project {project_id}'}), 200
+            else:
+                return jsonify(
+                    {'msg': 'Unable to check out the requested quantity. Ensure availability and valid quantity.'}), 400
         else:
-            return jsonify({'msg': 'Unable to check out the requested quantity. Ensure availability and valid quantity.'}), 400
+            return jsonify({'msg': f'only {amt} units checked out, amount requested ({qty}) exceeded available capacity for project {project_id}'}), 200
+
+
 
 @app.route('/projects/<project_id>/checkin', methods=['POST'])
 def checkin_hardware(project_id):
@@ -235,6 +244,7 @@ def checkin_hardware(project_id):
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         project_db = projectsDatabase.projectsDatabase(client)
+        hardware_db = hardwareDatabase.hardwareDatabase(client)
 
         if project_db.check_in(project_id, hw_set, qty):
             return jsonify({'msg': f'{qty} units checked in successfully for project {project_id}'}), 200

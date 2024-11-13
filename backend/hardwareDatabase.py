@@ -5,7 +5,7 @@ class hardwareDatabase:
         self.db = client['hardwareDB']
         self.hardware_collection = self.db['hardwareSets']
 
-    def initialize_hardware_sets(self, hwset1_capacity=500, hwset2_capacity=500):
+    def initialize_hardware_sets(self, hwset1_capacity=100, hwset2_capacity=100):
         if not self.hardware_collection.find_one({"hwName": "HWset1"}):
             hwset1 = {
                 "hwName": "HWset1",
@@ -34,8 +34,15 @@ class hardwareDatabase:
                 {"hwName": hwSetName},
                 {"$set": {"available_capacity": new_capacity}}
             )
-            return True
-        return False
+            return True, amount
+        if hw_set:
+            checkedOut = self.hardware_collection.find_one({"available_capacity": amount})
+            self.hardware_collection.update_one(
+                {"hwName": hwSetName},
+                {"$set": {"available_capacity": 0}}
+            )
+            return False, checkedOut
+        return False, 0
 
     def return_space(self, hwSetName, amount):
         hw_set = self.hardware_collection.find_one({"hwName": hwSetName})
@@ -69,8 +76,11 @@ class hardwareDatabase:
 
         return user_inventory
     
-    def get_hardware_for_project(self, project_id):
-        # For now, we assume each project has two predefined hardware sets (HWset1 and HWset2)
+    def get_hardware_for_project(self):
+        # initialize if doesn't exist
+        if not self.hardware_collection.find_one({"hwName": "HWset1"}):
+            self.initialize_hardware_sets()
+
         return [
             {
                 "hwName": "HWset1",

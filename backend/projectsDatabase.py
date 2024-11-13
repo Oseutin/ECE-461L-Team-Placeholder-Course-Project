@@ -1,3 +1,6 @@
+from backend.hardwareDatabase import hardwareDatabase
+
+
 class projectsDatabase:
     def __init__(self, client):
         self.db = client['projectsDB']
