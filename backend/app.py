@@ -203,7 +203,7 @@ def checkout_hardware(project_id):
         return jsonify({'msg': 'Unauthorized access'}), 401
 
     data = request.get_json()
-    hw_set = data.get('hw_set')
+    hw_set = data.get('hw_name')
     qty = data.get('quantity')
 
     if hw_set not in ['HWset1', 'HWset2'] or qty is None:
@@ -225,7 +225,7 @@ def checkin_hardware(project_id):
         return jsonify({'msg': 'Unauthorized access'}), 401
 
     data = request.get_json()
-    hw_set = data.get('hw_set')
+    hw_set = data.get('hw_name')
     qty = data.get('quantity')
 
     if hw_set not in ['HWset1', 'HWset2'] or qty is None:

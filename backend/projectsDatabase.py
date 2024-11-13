@@ -6,7 +6,8 @@ class projectsDatabase:
     def query_project(self, project_id):
         return self.project_collection.find_one({'projectId': project_id})
 
-    def create_project(self, project_name, project_id, description, username):
+    def create_project(self, project_name, project_id, description, username): 
+        # Check if a project with the same projectId already exists
         if self.project_collection.find_one({'projectId': project_id}):
             print(f"A project with the ID '{project_id}' already exists.")
             return False
@@ -16,8 +17,7 @@ class projectsDatabase:
             'projectId': project_id,
             'description': description,
             'users': [username],
-            'coamt1': 0,
-            'coamt2': 0
+            'coamt': 0
         }
         self.project_collection.insert_one(project)
         print(f"Project '{project_name}' created successfully.")
