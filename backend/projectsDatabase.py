@@ -1,4 +1,3 @@
-from backend.hardwareDatabase import hardwareDatabase
 
 
 class projectsDatabase:
