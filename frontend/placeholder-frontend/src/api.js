@@ -12,13 +12,14 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
  * @returns {Promise<Object>} Message and new availability.
  */
 export const checkOutHardware = async (projectId, qty, hwName, auth) => {
+  const token = localStorage.getItem('token');
   try {
     const response = await axios.post(`${API_BASE_URL}/projects/${projectId}/checkout`, {
       hw_name: hwName,
       quantity: qty,
     }, {
       headers: {
-        'Authorization': `Bearer ${auth}`
+        'Authorization': `Bearer ${token}`
       }
     });
     return response.data;

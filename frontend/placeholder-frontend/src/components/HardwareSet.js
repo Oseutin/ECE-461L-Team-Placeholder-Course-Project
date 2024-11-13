@@ -17,7 +17,7 @@ function HardwareSet({ hardwareSet, projectId, auth, refreshProjects }) {
         }
         try {
             const response = await checkInHardware(projectId, parseInt(quantity), hardwareSet.hwName, auth);
-            setSnackbar({ open: true, message: response.message, severity: 'success' });
+            setSnackbar({ open: true, message: response.msg, severity: 'success' });
             refreshProjects();
             setQuantity('');
         } catch (error) {
@@ -32,7 +32,7 @@ function HardwareSet({ hardwareSet, projectId, auth, refreshProjects }) {
         }
         try {
             const response = await checkOutHardware(projectId, parseInt(quantity), hardwareSet.hwName, auth);
-            setSnackbar({ open: true, message: response.message, severity: 'success' });
+            setSnackbar({ open: true, message: response.msg, severity: 'success' });
             refreshProjects();
             setQuantity('');
         } catch (error) {
