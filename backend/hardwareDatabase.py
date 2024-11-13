@@ -47,12 +47,13 @@ class hardwareDatabase:
     def return_space(self, hwSetName, amount):
         hw_set = self.hardware_collection.find_one({"hwName": hwSetName})
         if hw_set:
-            new_capacity = min(hw_set['available_capacity'] + amount, hw_set['total_capacity'])
-            self.hardware_collection.update_one(
-                {"hwName": hwSetName},
-                {"$set": {"available_capacity": new_capacity}}
-            )
-            return True
+            if hw_set['available_space'] >= amount:
+                new_capacity = min(hw_set['available_capacity'] + amount, hw_set['total_capacity'])
+                self.hardware_collection.update_one(
+                    {"hwName": hwSetName},
+                    {"$set": {"available_capacity": new_capacity}}
+                )
+                return True
         return False
     
     def get_user_hardware(self, username, projects):

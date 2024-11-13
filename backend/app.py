@@ -223,6 +223,7 @@ def checkout_hardware(project_id):
                 return jsonify(
                     {'msg': 'Unable to check out the requested quantity. Ensure availability and valid quantity.'}), 400
         else:
+            project_db.check_out(project_id, hw_set, amt)
             return jsonify({'msg': f'only {amt} units checked out, amount requested ({qty}) exceeded available capacity for project {project_id}'}), 200
 
 
