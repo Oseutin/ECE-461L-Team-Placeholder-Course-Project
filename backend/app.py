@@ -201,7 +201,6 @@ def get_hardware_sets(project_id):
 
 @app.route('/projects/<project_id>/checkout', methods=['POST'])
 def checkout_hardware(project_id):
-    # from projectsDatabase import projectsDatabase
     token = request.headers.get('Authorization', '').split(' ')[1]
     user_data = verify_token(token)
     if not user_data:
@@ -233,7 +232,6 @@ def checkout_hardware(project_id):
 
 @app.route('/projects/<project_id>/checkin', methods=['POST'])
 def checkin_hardware(project_id):
-    # from projectsDatabase import projectsDatabase
     token = request.headers.get('Authorization', '').split(' ')[1]
     user_data = verify_token(token)
     if not user_data:
