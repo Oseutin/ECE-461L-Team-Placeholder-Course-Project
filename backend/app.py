@@ -254,7 +254,6 @@ def checkin_hardware(project_id):
                 return jsonify(
                 {'msg': 'Failed to check in hardware. Check the checked-out quantity and try again.'}), 400
         else:
-            hardware_db.return_space(hw_set, qty)
             return jsonify(
                 {'msg': 'Failed to check in hardware. Check the checked-out quantity and try again.'}), 400
 
