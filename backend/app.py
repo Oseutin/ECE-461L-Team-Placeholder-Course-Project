@@ -106,12 +106,10 @@ def create_project():
         return jsonify({'msg': 'Unauthorized access'}), 401
 
     username = user_data.get('username')
+    hashed_username = hashlib.sha256(username.encode()).hexdigest()
     project_data = request.json.get('project_data')
-
     if not hashed_username or not project_data:
         return jsonify({'msg': 'Username and project data are required'}), 400
-
-    hashed_username = hashlib.sha256(username.encode()).hexdigest()
 
     project_name = project_data.get('name')
     project_id = project_data.get('id')
@@ -142,7 +140,6 @@ def create_project():
 def fetch_inventory():
     token = request.headers.get('Authorization', '').split(' ')[1]
     user_data = verify_token(token)
-    
     if not user_data:
         return jsonify({'msg': 'Unauthorized access'}), 401
 
