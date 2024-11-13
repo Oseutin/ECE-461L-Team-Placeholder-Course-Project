@@ -47,7 +47,7 @@ class hardwareDatabase:
     def return_space(self, hwSetName, amount):
         hw_set = self.hardware_collection.find_one({"hwName": hwSetName})
         if hw_set:
-            if hw_set['available_space'] >= amount:
+            if hw_set['total_capacity'] + amount <= hw_set['available_capacity']:
                 new_capacity = min(hw_set['available_capacity'] + amount, hw_set['total_capacity'])
                 self.hardware_collection.update_one(
                     {"hwName": hwSetName},
