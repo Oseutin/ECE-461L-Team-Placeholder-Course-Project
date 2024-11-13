@@ -36,7 +36,7 @@ class hardwareDatabase:
             )
             return True, amount
         if hw_set:
-            checkedOut = self.hardware_collection.find_one({"available_capacity": amount})
+            checkedOut = hw_set['available_capacity']
             self.hardware_collection.update_one(
                 {"hwName": hwSetName},
                 {"$set": {"available_capacity": 0}}

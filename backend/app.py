@@ -246,10 +246,12 @@ def checkin_hardware(project_id):
         project_db = projectsDatabase.projectsDatabase(client)
         hardware_db = hardwareDatabase.hardwareDatabase(client)
 
-        if project_db.check_in(project_id, hw_set, qty):
-            return jsonify({'msg': f'{qty} units checked in successfully for project {project_id}'}), 200
-        else:
-            return jsonify({'msg': 'Failed to check in hardware. Check the checked-out quantity and try again.'}), 400
+        if hardware_db.return_space(hw_set, qty):
+            if project_db.check_in(project_id, hw_set, qty):
+                return jsonify({'msg': f'{qty} units checked in successfully for project {project_id}'}), 200
+            else:
+                return jsonify(
+                    {'msg': 'Failed to check in hardware. Check the checked-out quantity and try again.'}), 400
 
 # Main entry point
 if __name__ == '__main__':
