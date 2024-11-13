@@ -109,8 +109,11 @@ def create_project():
     project_id = project_data.get('id')
     description = project_data.get('description')
 
-    if not project_name or not project_id or not description:
-        return jsonify({'msg': 'Project name, ID, and description are required'}), 400
+    if not project_name or not project_id:
+        return jsonify({'msg': 'Project name and ID are required'}), 400
+    
+    if not description:
+        description = ""
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         project_db = projectsDatabase.projectsDatabase(client)
