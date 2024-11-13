@@ -15,7 +15,8 @@ class projectsDatabase:
             'projectName': project_name,
             'projectId': project_id,
             'description': description,
-            'users': [username]  # Only linking users to the project without hardware data
+            'users': [username],
+            'coamt': 0
         }
         self.project_collection.insert_one(project)
         print(f"Project '{project_name}' created successfully.")
@@ -39,3 +40,43 @@ class projectsDatabase:
         for project in projects:
             project['_id'] = str(project['_id'])  # Convert ObjectId to string for JSON serialization
         return projects
+    
+    def check_out(self, project_id, amount: int) -> bool:
+        project = self.query_project(project_id)
+        if project is None:
+            print("Project not found.")
+            return False
+
+        result = self.project_collection.update_one(
+            {'projectId': project_id},
+            {'$inc': {'coamt': amount}}
+        )
+        
+        if result.modified_count > 0:
+            print(f"Successfully checked out {amount} units for project '{project_id}'.")
+            return True
+        else:
+            print("Failed to check out hardware.")
+            return False
+
+    def check_in(self, project_id, amount: int) -> bool:
+        project = self.query_project(project_id)
+        if project is None:
+            print("Project not found.")
+            return False
+
+        if project['coamt'] < amount:
+            print("Cannot check in more than the current checked-out amount.")
+            return False
+
+        result = self.project_collection.update_one(
+            {'projectId': project_id},
+            {'$inc': {'coamt': -amount}}
+        )
+
+        if result.modified_count > 0:
+            print(f"Successfully checked in {amount} units for project '{project_id}'.")
+            return True
+        else:
+            print("Failed to check in hardware.")
+            return False

@@ -206,20 +206,22 @@ def checkout_hardware(project_id):
 
     username = user_data.get('username')
     data = request.get_json()
-    hw_name = data.get('hw_name')
+    # hw_name = data.get('hw_name')
     qty = data.get('quantity')
 
-    if not hw_name or qty is None:
-        return jsonify({'msg': 'Hardware name and quantity are required'}), 400
+    if qty is None:
+        return jsonify({'msg': 'Quantity is required'}), 400
+
+    # if not hw_name or qty is None:
+    #     return jsonify({'msg': 'Hardware name and quantity are required'}), 400
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
-        user_db = usersDatabase(client)
+        project_db = projectsDatabase(client)
 
-         # Check out hardware from user's project
-        if user_db.check_out_hardware(username, project_id, hw_name, qty):
-            return jsonify({'msg': f'{qty} units of {hw_name} checked out successfully'}), 200
+        if project_db.check_out(project_id, qty):
+            return jsonify({'msg': f'{qty} units checked out successfully for project {project_id}'}), 200
         else:
-            return jsonify({'msg': f'Unable to check out {hw_name}. Ensure sufficient hardware is available.'}), 400
+            return jsonify({'msg': 'Unable to check out the requested quantity. Ensure availability and valid quantity.'}), 400
 
 @app.route('/projects/<project_id>/checkin', methods=['POST'])
 def checkin_hardware(project_id):
@@ -232,20 +234,21 @@ def checkin_hardware(project_id):
 
     username = user_data.get('username')
     data = request.get_json()
-    hw_name = data.get('hw_name')
+    # hw_name = data.get('hw_name')
     qty = data.get('quantity')
 
-    if not hw_name or qty is None:
-        return jsonify({'msg': 'Hardware name and quantity are required'}), 400
+    # if not hw_name or qty is None:
+    #     return jsonify({'msg': 'Hardware name and quantity are required'}), 400
+    if qty is None:
+        return jsonify({'msg': 'Quantity is required'}), 400
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
-        user_db = usersDatabase(client)
+        project_db = projectsDatabase(client)
 
-        # Check in hardware to user's project
-        if user_db.check_in_hardware(username, project_id, hw_name, qty):
-            return jsonify({'msg': f'{qty} units of {hw_name} checked in successfully'}), 200
+        if project_db.check_in(project_id, qty):
+            return jsonify({'msg': f'{qty} units checked in successfully for project {project_id}'}), 200
         else:
-            return jsonify({'msg': 'Failed to check in hardware'}), 400
+            return jsonify({'msg': 'Failed to check in hardware. Check the checked-out quantity and try again.'}), 400
 
 # Main entry point
 if __name__ == '__main__':
