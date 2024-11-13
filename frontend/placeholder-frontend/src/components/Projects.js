@@ -102,6 +102,19 @@ function Projects({ token, handleLogout }) {
     }
   };
 
+  const handleLeaveProject = async (projectId) => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.post(`${process.env.REACT_APP_API_URL}/leave_project`, { id: projectId }, {
+        headers: { Authorization: `Bearer ${token}`}
+      });
+      setSnackbar({ open: true, message: 'Successfully left project.', severity: 'success' });
+      fetchProjects();
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to leave project.', severity: 'error' });
+    }
+  }
+
   const handleCreateProjectOpen = () => {
     setCreateDialogOpen(true);
   };
@@ -206,7 +219,21 @@ function Projects({ token, handleLogout }) {
         <Typography variant="h6">No authorized projects available.</Typography>
       ) : (
         Object.values(projectData).map((project) => (
-          <Project key={project.id} project={project} token={token} refreshProjects={fetchProjects} fetchHardwareSets={fetchHardwareSets} />
+          <Box key={project.id} style={{ marginBottom: '15px' }}>
+            <Project
+              project={project}
+              token={token}
+              refreshProjects={fetchProjects}
+              fetchHardwareSets={fetchHardwareSets}
+            />
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => handleLeaveProject(project.projectId)}
+            >
+              Leave Project
+            </Button>
+          </Box>      
           ))
       )}
 
