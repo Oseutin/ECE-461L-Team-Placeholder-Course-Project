@@ -17,7 +17,8 @@ class projectsDatabase:
             'projectId': project_id,
             'description': description,
             'users': [username],
-            'coamt': 0
+            'coamt1': 0,
+            'coamt2': 0
         }
         self.project_collection.insert_one(project)
         print(f"Project '{project_name}' created successfully.")
