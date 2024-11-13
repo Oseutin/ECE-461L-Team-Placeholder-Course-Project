@@ -1,5 +1,3 @@
-
-
 class projectsDatabase:
     def __init__(self, client):
         self.db = client['projectsDB']
