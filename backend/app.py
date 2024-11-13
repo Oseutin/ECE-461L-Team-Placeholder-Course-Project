@@ -191,61 +191,50 @@ def get_hardware_sets(project_id):
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         hardware_db = hardwareDatabase.hardwareDatabase(client)
         
-        # Fetch the hardware sets for this project
         hardware_sets = hardware_db.get_hardware_for_project(project_id)
         
     return jsonify({"hardwareSets": hardware_sets}), 200
 
 @app.route('/projects/<project_id>/checkout', methods=['POST'])
 def checkout_hardware(project_id):
-    # Verify JWT token
     token = request.headers.get('Authorization', '').split(' ')[1]
     user_data = verify_token(token)
     if not user_data:
         return jsonify({'msg': 'Unauthorized access'}), 401
 
-    username = user_data.get('username')
     data = request.get_json()
-    # hw_name = data.get('hw_name')
+    hw_set = data.get('hw_set')
     qty = data.get('quantity')
 
-    if qty is None:
-        return jsonify({'msg': 'Quantity is required'}), 400
-
-    # if not hw_name or qty is None:
-    #     return jsonify({'msg': 'Hardware name and quantity are required'}), 400
+    if hw_set not in ['HWset1', 'HWset2'] or qty is None:
+        return jsonify({'msg': 'Hardware set (HWset1 or HWset2) and quantity are required'}), 400
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         project_db = projectsDatabase(client)
 
-        if project_db.check_out(project_id, qty):
+        if project_db.check_out(project_id, hw_set, qty):
             return jsonify({'msg': f'{qty} units checked out successfully for project {project_id}'}), 200
         else:
             return jsonify({'msg': 'Unable to check out the requested quantity. Ensure availability and valid quantity.'}), 400
 
 @app.route('/projects/<project_id>/checkin', methods=['POST'])
 def checkin_hardware(project_id):
-    from hardwareDatabase import hardwareDatabase
-    # Verify JWT token
     token = request.headers.get('Authorization', '').split(' ')[1]
     user_data = verify_token(token)
     if not user_data:
         return jsonify({'msg': 'Unauthorized access'}), 401
 
-    username = user_data.get('username')
     data = request.get_json()
-    # hw_name = data.get('hw_name')
+    hw_set = data.get('hw_set')
     qty = data.get('quantity')
 
-    # if not hw_name or qty is None:
-    #     return jsonify({'msg': 'Hardware name and quantity are required'}), 400
-    if qty is None:
-        return jsonify({'msg': 'Quantity is required'}), 400
+    if hw_set not in ['HWset1', 'HWset2'] or qty is None:
+        return jsonify({'msg': 'Hardware set (HWset1 or HWset2) and quantity are required'}), 400
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         project_db = projectsDatabase(client)
 
-        if project_db.check_in(project_id, qty):
+        if project_db.check_in(project_id, hw_set, qty):
             return jsonify({'msg': f'{qty} units checked in successfully for project {project_id}'}), 200
         else:
             return jsonify({'msg': 'Failed to check in hardware. Check the checked-out quantity and try again.'}), 400
