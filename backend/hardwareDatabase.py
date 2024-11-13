@@ -83,3 +83,4 @@ class hardwareDatabase:
                 "available_capacity": self.get_available_capacity("HWset2")
             }
         ]
+
