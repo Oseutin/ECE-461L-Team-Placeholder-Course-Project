@@ -197,6 +197,7 @@ def get_hardware_sets(project_id):
 
 @app.route('/projects/<project_id>/checkout', methods=['POST'])
 def checkout_hardware(project_id):
+    # from projectsDatabase import projectsDatabase
     token = request.headers.get('Authorization', '').split(' ')[1]
     user_data = verify_token(token)
     if not user_data:
@@ -210,7 +211,7 @@ def checkout_hardware(project_id):
         return jsonify({'msg': 'Hardware set (HWset1 or HWset2) and quantity are required'}), 400
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
-        project_db = projectsDatabase(client)
+        project_db = projectsDatabase.projectsDatabase(client)
 
         if project_db.check_out(project_id, hw_set, qty):
             return jsonify({'msg': f'{qty} units checked out successfully for project {project_id}'}), 200
@@ -219,6 +220,7 @@ def checkout_hardware(project_id):
 
 @app.route('/projects/<project_id>/checkin', methods=['POST'])
 def checkin_hardware(project_id):
+    # from projectsDatabase import projectsDatabase
     token = request.headers.get('Authorization', '').split(' ')[1]
     user_data = verify_token(token)
     if not user_data:
@@ -232,7 +234,7 @@ def checkin_hardware(project_id):
         return jsonify({'msg': 'Hardware set (HWset1 or HWset2) and quantity are required'}), 400
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
-        project_db = projectsDatabase(client)
+        project_db = projectsDatabase.projectsDatabase(client)
 
         if project_db.check_in(project_id, hw_set, qty):
             return jsonify({'msg': f'{qty} units checked in successfully for project {project_id}'}), 200
