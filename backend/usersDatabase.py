@@ -35,3 +35,10 @@ class usersDatabase:
         )
 
         return result.modified_count > 0
+    
+    def remove_project_from_user(self, username: str, project_id: str) -> bool:
+        result = self.users_collection.update_one(
+            {'username': username},
+            {'$pull': {'projects': project_id}}
+        )
+        return result.modified_count > 0

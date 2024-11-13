@@ -86,3 +86,10 @@ class projectsDatabase:
         else:
             print("Failed to check in hardware.")
             return False
+        
+    def remove_user(self, project_id, username):
+        result = self.project_collection.update_one(
+            {'projectId': project_id},
+            {'$pull': {'users': username}}
+        )
+        return result.modified_count > 0

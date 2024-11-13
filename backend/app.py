@@ -191,6 +191,40 @@ def join_project():
             return jsonify({'msg': f'User {username} joined project {project_id} successfully'}), 200
         else:
             return jsonify({'msg': 'User is already a member of the project or an error occurred'}), 400
+        
+# Leave project
+@app.route('/leave_project', methods=['POST'])
+def leave_project():
+    token = request.headers.get('Authorization', '').split(' ')[1]
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({'msg': 'Unauthorized access'}), 401
+    
+    username = user_data.get('username')
+    project_id = request.json.get('id')
+    
+    if not username or not project_id:
+        return jsonify({'msg': 'Username and project ID are required'}), 400
+    
+    hashed_username = hashlib.sha256(username.encode()).hexdigest()
+    
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        project_db = projectsDatabase.projectsDatabase(client)
+        user_db = usersDatabase(client)
+        
+        project = project_db.query_project(project_id)
+        if not project:
+            return jsonify({'msg': 'Project not found'}), 404
+        
+        user = user_db.get_user(hashed_username)
+        if not user:
+            return jsonify({'msg': 'User not found'}), 404
+        
+        if project_db.remove_user(project_id, hashed_username):
+            user_db.remove_project_from_user(hashed_username, project_id)
+            return jsonify({'msg': f'User {username} left project {project_id} successfully'}), 200
+        else:
+            return jsonify({'msg': 'User is not a member of the project or an error occurred'}), 400
 
 @app.route('/hardware_sets/<project_id>', methods=['GET'])
 def get_hardware_sets(project_id):
