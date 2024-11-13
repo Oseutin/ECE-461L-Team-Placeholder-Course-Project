@@ -28,8 +28,8 @@ class usersDatabase:
         project_data = {
             'projectId': project_id,
             'hardware': {
-                'HWSet1': 0,
-                'HWSet2': 0
+                'HWset1': 0,
+                'HWset2': 0
             }
         }
 
