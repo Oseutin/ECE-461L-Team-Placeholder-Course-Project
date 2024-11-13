@@ -20,8 +20,13 @@ class projectsDatabase:
             'projectName': project_name,
             'projectId': project_id,
             'description': description,
+<<<<<<< HEAD
             'users': [username],  # Link project to the creator
             'hardwareAvailability': initial_hardware  # Independent hardware availability
+=======
+            'users': [username],
+            'coamt': 0
+>>>>>>> 8031472c570e22a8d4bdeda37f4ae148331f7808
         }
         self.project_collection.insert_one(project)
         print(f"Project '{project_name}' created successfully.")
@@ -45,9 +50,52 @@ class projectsDatabase:
         for project in projects:
             project['_id'] = str(project['_id'])  # Convert ObjectId to string for JSON serialization
         return projects
+<<<<<<< HEAD
 
     def update_hardware_availability(self, project_id, hw_set_name, new_qty):
         self.project_collection.update_one(
             {'projectId': project_id},
             {'$set': {f'hardwareAvailability.{hw_set_name}': new_qty}}
         )
+=======
+    
+    def check_out(self, project_id, amount: int) -> bool:
+        project = self.query_project(project_id)
+        if project is None:
+            print("Project not found.")
+            return False
+
+        result = self.project_collection.update_one(
+            {'projectId': project_id},
+            {'$inc': {'coamt': amount}}
+        )
+        
+        if result.modified_count > 0:
+            print(f"Successfully checked out {amount} units for project '{project_id}'.")
+            return True
+        else:
+            print("Failed to check out hardware.")
+            return False
+
+    def check_in(self, project_id, amount: int) -> bool:
+        project = self.query_project(project_id)
+        if project is None:
+            print("Project not found.")
+            return False
+
+        if project['coamt'] < amount:
+            print("Cannot check in more than the current checked-out amount.")
+            return False
+
+        result = self.project_collection.update_one(
+            {'projectId': project_id},
+            {'$inc': {'coamt': -amount}}
+        )
+
+        if result.modified_count > 0:
+            print(f"Successfully checked in {amount} units for project '{project_id}'.")
+            return True
+        else:
+            print("Failed to check in hardware.")
+            return False
+>>>>>>> 8031472c570e22a8d4bdeda37f4ae148331f7808
