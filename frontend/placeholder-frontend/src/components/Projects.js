@@ -4,8 +4,10 @@ import Project from './Project';
 import { Container, Typography, Button, Box, CircularProgress, Snackbar, Alert, Card, CardContent, TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function Projects({ token, handleLogout }) {
+  const [username, setUsername] = useState('');
   const [projectData, setProjectData] = useState({});
   const [userInventory, setUserInventory] = useState({});
   const [loading, setLoading] = useState(true);
@@ -15,6 +17,14 @@ function Projects({ token, handleLogout }) {
   const [newProjectId, setNewProjectId] = useState('');
   const [newProject, setNewProject] = useState({ id: '', name: '', description: '' });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded = jwtDecode(token);
+      setUsername(decoded.username); // assuming `username` is the field in the decoded token
+    }
+  }, []);
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -30,11 +40,9 @@ function Projects({ token, handleLogout }) {
         }
       });
 
-      // Handle project data structure and guard against undefined
       const projectsArray = response.data.projects || [];
       const userInventory = response.data.userInventory || {};
 
-      // Convert projects array to an object with project IDs as keys for easier lookup
       const projectsObject = projectsArray.reduce((acc, project) => {
         acc[project.projectId] = project;
         return acc;
@@ -146,13 +154,16 @@ function Projects({ token, handleLogout }) {
         console.error('Error fetching hardware sets:', error);
         return [];
     }
-};
+  };
 
   return (
     <Container maxWidth="md" style={{ marginTop: '40px' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="20px">
         <Typography variant="h3" gutterBottom>
           Projects
+        </Typography>
+        <Typography variant="body1" color="textSecondary">
+          Logged in as: {username}
         </Typography>
         <Button variant="outlined" color="secondary" onClick={handleLogoutClick}>
           Logout
@@ -163,8 +174,6 @@ function Projects({ token, handleLogout }) {
         <Typography variant="h5" gutterBottom>Your Hardware Inventory</Typography>
         {Object.entries(userInventory).map(([projectId, hardwareSets]) => {
           const project = projectData[projectId];
-          // if (!project) return null;
-
           return (
             <Card key={projectId} style={{ marginBottom: '15px' }}>
               <CardContent>
