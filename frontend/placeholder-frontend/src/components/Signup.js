@@ -24,7 +24,7 @@ function Signup({ setAuth }) {
     if (/[A-Z]/.test(password)) strength += 20; // Uppercase letter
     if (/[a-z]/.test(password)) strength += 20; // Lowercase letter
     if (/\d/.test(password)) strength += 20; // Number
-    if (/[@$!%*?&#]/.test(password)) strength += 20; // Special character
+    if (/[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/.test(password)) strength += 20; // Special character
     return strength;
   };
 
@@ -45,7 +45,7 @@ function Signup({ setAuth }) {
       return;
     }
 
-    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    const passwordRequirements = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~])[A-Za-z\d!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]{8,}$/;
     if (!passwordRequirements.test(password)) {
       setSnackbar({ 
         open: true, 
@@ -130,7 +130,7 @@ function Signup({ setAuth }) {
             <Typography variant="caption" color={isRequirementMet(/\d/) ? "green" : "error"}>
               - At least one number
             </Typography><br />
-            <Typography variant="caption" color={isRequirementMet(/[@$!%*?&#]/) ? "green" : "error"}>
+            <Typography variant="caption" color={isRequirementMet(/[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/) ? "green" : "error"}>
               - At least one special character (e.g., @$!%*?&)
             </Typography>
           </Box>

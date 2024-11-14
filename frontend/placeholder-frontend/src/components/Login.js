@@ -84,7 +84,11 @@ function Login({ setAuth }) {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={handleClickShowPassword} edge="end">
+                  <IconButton 
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>

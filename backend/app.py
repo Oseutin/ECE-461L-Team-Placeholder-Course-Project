@@ -37,7 +37,7 @@ def serialize_user(user):
 # Utility to validate password security on the backend
 def validate_password(password): 
     # Password must be at least 8 characters, include an uppercase letter, a number, and a special character.
-    pattern = re.compile(r"^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$")
+    pattern = re.compile(r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!\"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~])[A-Za-z\d!\"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]{8,}$")
     return bool(pattern.match(password))
 
 # Login
