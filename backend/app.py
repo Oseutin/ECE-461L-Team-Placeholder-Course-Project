@@ -16,7 +16,7 @@ MONGODB_SERVER = "mongodb+srv://amybae:abcdefg@placeholdercluster.odsig.mongodb.
 
 app = Flask(__name__)
 Swagger(app)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+CORS(app)
 
 SECRET_KEY = "VerySecret"
 
