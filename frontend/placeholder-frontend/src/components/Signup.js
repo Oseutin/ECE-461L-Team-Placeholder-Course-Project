@@ -12,6 +12,7 @@ function Signup({ setAuth }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [usernameError, setUsernameError] = useState('');
   const navigate = useNavigate();
 
   const handleCloseSnackbar = () => {
@@ -34,9 +35,26 @@ function Signup({ setAuth }) {
     setPasswordStrength(calculatePasswordStrength(newPassword));
   };
 
+  const usernameRequirements = /^[a-zA-Z0-9_.]{5,20}$/; // Alphanumeric, underscores, and periods, 5-20 characters
+
+  const handleUsernameChange = (e) => {
+    const newUsername = e.target.value;
+    setUsername(newUsername);
+    if (!usernameRequirements.test(newUsername)) {
+      setUsernameError('Username must be 5-20 characters long and can only contain letters, numbers, underscores, and periods.');
+    } else {
+      setUsernameError('');
+    }
+  };
+
   const handleSignup = async () => {
     if (!username || !password || !confirmPassword) {
       setSnackbar({ open: true, message: 'Please fill out all fields.', severity: 'error' });
+      return;
+    }
+
+    if (!usernameRequirements.test(username)) {
+      setSnackbar({ open: true, message: 'Username must be 5-20 characters long and can only contain letters, numbers, underscores, and periods.', severity: 'error' });
       return;
     }
 
@@ -91,8 +109,10 @@ function Signup({ setAuth }) {
             fullWidth
             margin="normal"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={handleUsernameChange}
             required
+            error={!!usernameError}
+            helperText={usernameError}
           />
           <TextField
             label="Password"
@@ -126,6 +146,9 @@ function Signup({ setAuth }) {
             </Typography><br />
             <Typography variant="caption" color={isRequirementMet(/[A-Z]/) ? "green" : "error"}>
               - At least one uppercase letter
+            </Typography><br />
+            <Typography variant="caption" color={isRequirementMet(/[a-z]/) ? "green" : "error"}>
+              - At least one lowercase letter
             </Typography><br />
             <Typography variant="caption" color={isRequirementMet(/\d/) ? "green" : "error"}>
               - At least one number

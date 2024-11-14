@@ -1,4 +1,3 @@
-from bson.objectid import ObjectId
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flasgger import Swagger
@@ -39,6 +38,12 @@ def validate_password(password):
     # Password must be at least 8 characters, include an uppercase letter, a number, and a special character.
     pattern = re.compile(r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!\"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~])[A-Za-z\d!\"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]{8,}$")
     return bool(pattern.match(password))
+
+# Utility to validate username
+def validate_username(username):
+    # Username must be 5-20 characters long and can only contain letters, numbers, underscores, and periods.
+    pattern = re.compile(r"^[a-zA-Z0-9_.]{5,20}$")
+    return bool(pattern.match(username))
 
 # Login
 @app.route('/login', methods=['POST', 'OPTIONS'])
@@ -94,6 +99,9 @@ def add_user():
     if not username or not password:
         return jsonify({"msg": "Username and password are required fields"}), 400
     
+    if not validate_username(username):
+        return jsonify({"msg": "Username must be 5-20 characters long and can only contain letters, numbers, and underscores"}), 400
+
     if not validate_password(password):
         return jsonify({"msg": "Password must be at least 8 characters long and include an uppercase letter, a number, and a special character"}), 400
 
