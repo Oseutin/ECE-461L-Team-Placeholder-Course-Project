@@ -5,6 +5,7 @@ import { Container, Typography, Button, Box, CircularProgress, Snackbar, Alert, 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { ContentCopy } from '@mui/icons-material';
 
 function Projects({ token, handleLogout }) {
   const [username, setUsername] = useState('');
@@ -169,6 +170,11 @@ function Projects({ token, handleLogout }) {
     }
   };
 
+  const handleCopyProjectId = (projectId) => {
+    navigator.clipboard.writeText(projectId);
+    setSnackbar({ open: true, message: 'Project ID copied to clipboard.', severity: 'success' });
+  };
+
   return (
     <Container maxWidth="md" style={{ marginTop: '40px' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="20px">
@@ -191,7 +197,10 @@ function Projects({ token, handleLogout }) {
             <Card key={projectId} style={{ marginBottom: '15px' }}>
               <CardContent>
                 <Typography variant="h6">
-                  {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (ID: {projectId})</span>
+                  {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (ID: {projectId}
+                  <Button onClick={() => handleCopyProjectId(projectId)} style={{ marginLeft: '5px' }} title="Copy Project ID">
+                    <ContentCopy fontSize="small" />
+                  </Button>)</span>
                 </Typography>
                 <Typography variant="body2" color="textSecondary" style={{ marginTop: '5px', marginBottom: '10px' }}>
                   {project.description}

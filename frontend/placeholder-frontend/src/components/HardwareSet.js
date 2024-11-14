@@ -44,24 +44,25 @@ function HardwareSet({ hardwareSet, projectId, auth, refreshProjects }) {
         <Box border={1} borderColor="grey.300" borderRadius="8px" padding="16px" marginBottom="16px">
             <Typography variant="h6">{hardwareSet.hwName}</Typography>
             <Typography>Availability: {hardwareSet.available_capacity} / {hardwareSet.total_capacity}</Typography>
-            <TextField
-                label="Quantity"
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="Enter quantity"
-                fullWidth
-                margin="normal"
-            />
-            <Box display="flex" justifyContent="space-between">
-                <Button variant="contained" color="primary" onClick={handleCheckOut}>
-                    Check Out
-                </Button>
-                <Button variant="contained" color="secondary" onClick={handleCheckIn}>
-                    Check In
-                </Button>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+                <TextField
+                    label="Quantity"
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    placeholder="Enter quantity"
+                    margin="normal"
+                    style={{ width: '60%' }}
+                />
+                <Box display="flex" justifyContent="flex-end" alignItems="center" style={{ width: '40%' }}>
+                    <Button variant="contained" color="secondary" onClick={handleCheckIn} style={{ marginRight: '10px' }}>
+                        Check In
+                    </Button>
+                    <Button variant="contained" color="primary" onClick={handleCheckOut}>
+                        Check Out
+                    </Button>
+                </Box>
             </Box>
-            
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
