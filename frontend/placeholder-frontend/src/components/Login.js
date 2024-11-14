@@ -98,7 +98,7 @@ function Login({ setAuth }) {
             fullWidth
             style={{ marginTop: '1em' }}
           >
-            Login
+            Log in
           </Button>
           <Button
             variant="text"

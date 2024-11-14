@@ -1,6 +1,5 @@
-// frontend/src/components/Signup.js
 import React, { useState } from 'react';
-import { Button, TextField, Container, Typography, Box, Snackbar, Alert, InputAdornment, IconButton } from '@mui/material';
+import { Button, TextField, Container, Typography, Box, Snackbar, Alert, InputAdornment, IconButton, LinearProgress } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -12,10 +11,27 @@ function Signup({ setAuth }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const navigate = useNavigate();
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
+  };
+
+  const calculatePasswordStrength = (password) => {
+    let strength = 0;
+    if (password.length >= 8) strength += 20;
+    if (/[A-Z]/.test(password)) strength += 20; // Uppercase letter
+    if (/[a-z]/.test(password)) strength += 20; // Lowercase letter
+    if (/\d/.test(password)) strength += 20; // Number
+    if (/[@$!%*?&#]/.test(password)) strength += 20; // Special character
+    return strength;
+  };
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setPasswordStrength(calculatePasswordStrength(newPassword));
   };
 
   const handleSignup = async () => {
@@ -23,30 +39,30 @@ function Signup({ setAuth }) {
       setSnackbar({ open: true, message: 'Please fill out all fields.', severity: 'error' });
       return;
     }
-  
+
     if (password !== confirmPassword) {
       setSnackbar({ open: true, message: 'Passwords do not match.', severity: 'error' });
       return;
     }
 
-    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     if (!passwordRequirements.test(password)) {
       setSnackbar({ 
         open: true, 
-        message: 'Password must be at least 8 characters long and include an uppercase letter, a number, and a special character.', 
+        message: 'Password must meet all requirements.', 
         severity: 'error' 
       });
       return;
     }
-  
+
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/add_user`, {
         username,
         password
       });
-  
+
       const { access_token } = response.data;
-      if(access_token) {
+      if (access_token) {
         localStorage.setItem('token', access_token);
         setAuth(access_token);
         navigate('/projects');
@@ -54,33 +70,21 @@ function Signup({ setAuth }) {
         throw new Error("Signup successful, but no token received.");
       }
     } catch (error) {
-      console.error("Signup error:", error);
       const errorMsg = error.response?.data?.msg || 'Signup failed: An unexpected error occurred.';
       setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
-  };  
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleSignup();
   };
 
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+  // Helper function to check if each requirement is met
+  const isRequirementMet = (regex) => regex.test(password);
 
   return (
     <Container maxWidth="sm">
-      <Box 
-        display="flex" 
-        flexDirection="column" 
-        alignItems="center" 
-        justifyContent="center" 
-        minHeight="100vh"
-      >
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh">
         <Typography variant="h4" component="h1" gutterBottom>
           Sign Up
         </Typography>
-        <form onSubmit={handleSubmit} style={{ width: '100%', marginTop: '1em' }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSignup(); }} style={{ width: '100%', marginTop: '1em' }}>
           <TextField
             label="Username"
             variant="outlined"
@@ -97,18 +101,39 @@ function Signup({ setAuth }) {
             fullWidth
             margin="normal"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             required
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={handleClickShowPassword} edge="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
           />
+          <Box mt={1} mb={2}>
+            <LinearProgress variant="determinate" value={passwordStrength} />
+            <Typography variant="caption" display="block" align="center" style={{ marginTop: '8px' }}>
+              Password Strength: {passwordStrength}%
+            </Typography>
+          </Box>
+          {/* Password requirements hints */}
+          <Box mb={2}>
+            <Typography variant="caption" color={password.length >= 8 ? "green" : "error"}>
+              - At least 8 characters
+            </Typography><br />
+            <Typography variant="caption" color={isRequirementMet(/[A-Z]/) ? "green" : "error"}>
+              - At least one uppercase letter
+            </Typography><br />
+            <Typography variant="caption" color={isRequirementMet(/\d/) ? "green" : "error"}>
+              - At least one number
+            </Typography><br />
+            <Typography variant="caption" color={isRequirementMet(/[@$!%*?&#]/) ? "green" : "error"}>
+              - At least one special character (e.g., @$!%*?&)
+            </Typography>
+          </Box>
           <TextField
             label="Confirm Password"
             variant="outlined"
@@ -121,20 +146,14 @@ function Signup({ setAuth }) {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={handleClickShowConfirmPassword} edge="end">
+                  <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
                     {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
           />
-          <Button 
-            type="submit" 
-            variant="contained" 
-            color="primary" 
-            fullWidth
-            style={{ marginTop: '1em' }}
-          >
+          <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: '1em' }}>
             Sign Up
           </Button>
           <Button
