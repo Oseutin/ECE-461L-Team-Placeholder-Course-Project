@@ -1,5 +1,6 @@
 from bson.objectid import ObjectId
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+import os
 from flask_cors import CORS
 from flasgger import Swagger
 from pymongo import MongoClient
@@ -14,7 +15,7 @@ import hardwareDatabase
 
 MONGODB_SERVER = "mongodb+srv://amybae:abcdefg@placeholdercluster.odsig.mongodb.net/myDatabase?retryWrites=true&w=majority"
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder= 'build')
 Swagger(app)
 CORS(app)
 
@@ -288,6 +289,13 @@ def checkin_hardware(project_id):
 
     return jsonify({'msg': f'Checked in {quantity} of {hw_set_name}', 'newAvailability': new_project_qty}), 200
 
+# Serve the build folder files (like JS, CSS, etc.)
+@app.route('/', defaults = {'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, 'index.html')
 # Main entry point
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)
