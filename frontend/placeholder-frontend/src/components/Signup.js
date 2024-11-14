@@ -28,6 +28,16 @@ function Signup({ setAuth }) {
       setSnackbar({ open: true, message: 'Passwords do not match.', severity: 'error' });
       return;
     }
+
+    const passwordRequirements = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    if (!passwordRequirements.test(password)) {
+      setSnackbar({ 
+        open: true, 
+        message: 'Password must be at least 8 characters long and include an uppercase letter, a number, and a special character.', 
+        severity: 'error' 
+      });
+      return;
+    }
   
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/add_user`, {

@@ -8,6 +8,7 @@ import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import hashlib
+import re
 
 from usersDatabase import usersDatabase
 import projectsDatabase
@@ -32,6 +33,12 @@ def verify_token(token):
 def serialize_user(user):
     user['_id'] = str(user['_id'])
     return user
+
+# Utility to validate password security on the backend
+def validate_password(password): 
+    # Password must be at least 8 characters, include an uppercase letter, a number, and a special character.
+    pattern = re.compile(r"^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$")
+    return bool(pattern.match(password))
 
 # Login
 @app.route('/login', methods=['POST', 'OPTIONS'])
@@ -86,6 +93,9 @@ def add_user():
 
     if not username or not password:
         return jsonify({"msg": "Username and password are required fields"}), 400
+    
+    if not validate_password(password):
+        return jsonify({"msg": "Password must be at least 8 characters long and include an uppercase letter, a number, and a special character"}), 400
 
     hashed_username = hashlib.sha256(username.encode()).hexdigest()
     hashed_password = generate_password_hash(password)
