@@ -31,7 +31,7 @@ function App() {
         />
         <Route 
           path="/signup" 
-          element={<Signup />} 
+          element={<Signup setAuth={setAuth}/>} 
         />
         <Route 
           path="/projects" 

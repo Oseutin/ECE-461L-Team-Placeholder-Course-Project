@@ -94,8 +94,14 @@ def add_user():
         db = usersDatabase(client)
         if not db.add_user(hashed_username, hashed_password):
             return jsonify({"msg": "Failed to add user due to validation or duplicate issues"}), 400
+        
+    token = jwt.encode(
+        {"username": username, "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)},
+        SECRET_KEY,
+        algorithm="HS256"
+    )
 
-    return jsonify({"msg": "User added successfully"}), 201
+    return jsonify({"msg": "User added successfully", "access_token": token}), 201
 
 # Create project
 @app.route('/create_project', methods=['POST'])

@@ -5,7 +5,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function Signup() {
+function Signup({ setAuth }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,17 +30,21 @@ function Signup() {
     }
   
     try {
-      // Use environment variable for API URL
-      await axios.post(`${process.env.REACT_APP_API_URL}/add_user`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/add_user`, {
         username,
         password
       });
   
-      setSnackbar({ open: true, message: 'Signup successful! Redirecting to login...', severity: 'success' });
-  
-      // Redirect to login after a delay
-      setTimeout(() => navigate('/'), 3000);
+      const { access_token } = response.data;
+      if(access_token) {
+        localStorage.setItem('token', access_token);
+        setAuth(access_token);
+        navigate('/projects');
+      } else {
+        throw new Error("Signup successful, but no token received.");
+      }
     } catch (error) {
+      console.error("Signup error:", error);
       const errorMsg = error.response?.data?.msg || 'Signup failed: An unexpected error occurred.';
       setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
