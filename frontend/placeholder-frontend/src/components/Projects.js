@@ -71,6 +71,7 @@ function Projects({ token, handleLogout }) {
     const socket = io('http://localhost:5000');
     socket.on('hardware_update', (data) => {
       setUserInventory(data.hardwareSets);
+      fetchProjects(); // Refresh project data when hardware updates occur
     });
 
     return () => {
