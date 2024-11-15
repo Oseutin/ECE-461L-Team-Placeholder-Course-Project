@@ -84,7 +84,11 @@ function Login({ setAuth }) {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={handleClickShowPassword} edge="end">
+                  <IconButton 
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
@@ -98,11 +102,11 @@ function Login({ setAuth }) {
             fullWidth
             style={{ marginTop: '1em' }}
           >
-            Login
+            Log in
           </Button>
           <Button
             variant="text"
-            color="secondary"
+            color="primary"
             fullWidth
             style={{ marginTop: '1em' }}
             onClick={() => navigate('/signup')}

@@ -3,42 +3,55 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-export const checkInHardware = async (projectId, quantity, hardwareSet, token) => {
-  token = localStorage.getItem('token');
+/**
+ * Check out hardware for a project.
+ * @param {string} projectId 
+ * @param {number} qty 
+ * @param {string} hwName 
+ * @param {string} auth 
+ * @returns {Promise<Object>} Message and new availability.
+ */
+export const checkOutHardware = async (projectId, qty, hwName, auth) => {
+  const token = localStorage.getItem('token');
   try {
-      const response = await axios.post(
-          `${API_BASE_URL}/projects/${projectId}/checkin`,
-          { hardwareSet, quantity },
-          {
-              headers: {
-                  'Authorization': `Bearer ${token}`
-              }
-          }
-      );
-      return response.data;
+    const response = await axios.post(`${API_BASE_URL}/projects/${projectId}/checkout`, {
+      hw_name: hwName,
+      quantity: qty,
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
   } catch (error) {
-      throw error.response ? error.response.data : new Error('Network error');
+    throw error.response ? error.response.data : new Error('Network error');
   }
 };
 
-export const checkOutHardware = async (projectId, quantity, hardwareSet, token) => {
-  token = localStorage.getItem('token');
+/**
+ * Check in hardware for a project.
+ * @param {string} projectId 
+ * @param {number} qty 
+ * @param {string} hwName 
+ * @param {string} auth 
+ * @returns {Promise<Object>} Message and new availability.
+ */
+export const checkInHardware = async (projectId, qty, hwName, auth) => {
+  const token = localStorage.getItem('token');
   try {
-      const response = await axios.post(
-          `${API_BASE_URL}/projects/${projectId}/checkout`,
-          { hardwareSet, quantity },
-          {
-              headers: {
-                  'Authorization': `Bearer ${token}`
-              }
-          }
-      );
-      return response.data;
+    const response = await axios.post(`${API_BASE_URL}/projects/${projectId}/checkin`, {
+      hw_name: hwName,
+      quantity: qty,
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
   } catch (error) {
-      throw error.response ? error.response.data : new Error('Network error');
+    throw error.response ? error.response.data : new Error('Network error');
   }
 };
-
 
 /**
  * Joins a project.
@@ -47,10 +60,11 @@ export const checkOutHardware = async (projectId, quantity, hardwareSet, token) 
  * @returns {Promise<string>} Message from backend.
  */
 export const joinProject = async (projectId, auth) => {
+  const token = localStorage.getItem('token');
   try {
     const response = await axios.post(`${API_BASE_URL}/join_project`, { id: projectId }, {
       headers: {
-        'Authorization': `Bearer ${auth}`
+        'Authorization': `Bearer ${token}`
       }
     });
     return response.data.message;

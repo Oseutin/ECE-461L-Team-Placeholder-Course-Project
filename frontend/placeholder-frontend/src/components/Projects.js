@@ -3,9 +3,12 @@ import React, { useEffect, useState } from 'react';
 import Project from './Project';
 import { Container, Typography, Button, Box, CircularProgress, Snackbar, Alert, Card, CardContent, TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import { ContentCopy } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 
 function Projects({ token, handleLogout }) {
+  const [username, setUsername] = useState('');
   const [projectData, setProjectData] = useState({});
   const [userInventory, setUserInventory] = useState({});
   const [loading, setLoading] = useState(true);
@@ -14,7 +17,14 @@ function Projects({ token, handleLogout }) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newProjectId, setNewProjectId] = useState('');
   const [newProject, setNewProject] = useState({ id: '', name: '', description: '' });
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded = jwtDecode(token);
+      setUsername(decoded.username); // assuming `username` is the field in the decoded token
+    }
+  }, []);
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -30,11 +40,9 @@ function Projects({ token, handleLogout }) {
         }
       });
 
-      // Handle project data structure and guard against undefined
       const projectsArray = response.data.projects || [];
       const userInventory = response.data.userInventory || {};
 
-      // Convert projects array to an object with project IDs as keys for easier lookup
       const projectsObject = projectsArray.reduce((acc, project) => {
         acc[project.projectId] = project;
         return acc;
@@ -57,11 +65,6 @@ function Projects({ token, handleLogout }) {
     fetchProjects();
     // eslint-disable-next-line
   }, [token]);
-
-  const handleLogoutClick = () => {
-    handleLogout();
-    navigate('/');
-  };
 
   const handleJoinProjectOpen = () => {
     setJoinDialogOpen(true);
@@ -93,6 +96,19 @@ function Projects({ token, handleLogout }) {
       setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
   };
+
+  const handleLeaveProject = async (projectId) => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.post(`${process.env.REACT_APP_API_URL}/leave_project`, { id: projectId }, {
+        headers: { Authorization: `Bearer ${token}`}
+      });
+      setSnackbar({ open: true, message: 'Successfully left project.', severity: 'success' });
+      fetchProjects();
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to leave project.', severity: 'error' });
+    }
+  }
 
   const handleCreateProjectOpen = () => {
     setCreateDialogOpen(true);
@@ -146,7 +162,12 @@ function Projects({ token, handleLogout }) {
         console.error('Error fetching hardware sets:', error);
         return [];
     }
-  }; 
+  };
+
+  const handleCopyProjectId = (projectId) => {
+    navigator.clipboard.writeText(projectId);
+    setSnackbar({ open: true, message: 'Project ID copied to clipboard.', severity: 'success' });
+  };
 
   return (
     <Container maxWidth="md" style={{ marginTop: '40px' }}>
@@ -154,35 +175,42 @@ function Projects({ token, handleLogout }) {
         <Typography variant="h3" gutterBottom>
           Projects
         </Typography>
-        <Button variant="outlined" color="secondary" onClick={handleLogoutClick}>
-          Logout
-        </Button>
+        <Typography variant="body1" color="textSecondary">
+          Logged in as: {username}
+        </Typography>
       </Box>
       
       <Box marginBottom="20px">
         <Typography variant="h5" gutterBottom>Your Hardware Inventory</Typography>
         {Object.entries(userInventory).map(([projectId, hardwareSets]) => {
           const project = projectData[projectId];
-          // if (!project) return null;
-
           return (
-            <Card key={projectId} style={{ marginBottom: '15px' }}>
-              <CardContent>
-                <Typography variant="h6">
-                  {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (ID: {projectId})</span>
-                </Typography>
-                <Typography variant="body2" color="textSecondary" style={{ marginTop: '5px', marginBottom: '10px' }}>
-                  {project.description}
-                </Typography>
-                <Box marginTop="10px">
-                  {Object.entries(hardwareSets).map(([hwSetId, quantity]) => (
-                    <Typography key={hwSetId} variant="body2">
-                      {hwSetId}: {quantity} checked out
+            <motion.div
+              key={projectId} // Add key prop here
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card style={{ marginBottom: '15px' }}>
+                <CardContent>
+                  <Typography variant="h6">
+                    {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (Project ID: {projectId}
+                    <Button onClick={() => handleCopyProjectId(projectId)} style={{ marginLeft: '5px' }} title="Copy Project ID">
+                      <ContentCopy fontSize="small" />
+                    </Button>)</span>
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">{project.description}</Typography>
+                  <Box marginTop="10px">
+                    <Typography variant="body2">
+                      HWset1: {project.coamt1} checked out
                     </Typography>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
+                    <Typography variant="body2">
+                      HWset2: {project.coamt2} checked out
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
           );
         })}
       </Box>
@@ -197,21 +225,30 @@ function Projects({ token, handleLogout }) {
         <Typography variant="h6">No authorized projects available.</Typography>
       ) : (
         Object.values(projectData).map((project) => (
-          <Project
-            key={project.projectId}
-            project={project}
-            token={token}
-            refreshProjects={fetchProjects}
-            fetchHardwareSets={fetchHardwareSets}
-          />
-          ))
+          <motion.div
+            key={project.id} // Add key prop here
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Box style={{ marginBottom: '15px' }}>
+              <Project
+                project={project}
+                token={token}
+                refreshProjects={fetchProjects}
+                fetchHardwareSets={fetchHardwareSets}
+                handleLeaveProject={handleLeaveProject}
+              />
+            </Box>
+          </motion.div>
+        ))
       )}
 
       <Box display="flex" flexDirection="column" alignItems="center" marginTop="20px">
-        <Button variant="contained" color="primary" onClick={handleJoinProjectOpen} style={{ marginBottom: '10px' }}>
+        <Button variant="contained" color="primary" onClick={handleJoinProjectOpen} style={{ marginBottom: '10px' }} title="Join Existing Project">
           Join Existing Project
         </Button>
-        <Button variant="contained" color="primary" onClick={handleCreateProjectOpen}>
+        <Button variant="contained" color="primary" onClick={handleCreateProjectOpen} title="Create New Project">
           Create New Project
         </Button>
       </Box>
