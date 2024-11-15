@@ -202,9 +202,7 @@ function Projects({ token, handleLogout }) {
                     <ContentCopy fontSize="small" />
                   </Button>)</span>
                 </Typography>
-                <Typography variant="body2" color="textSecondary" style={{ marginTop: '5px', marginBottom: '10px' }}>
-                  {project.description}
-                </Typography>
+                <Typography variant="body2" color="textSecondary">{project.description}</Typography>
                 <Box marginTop="10px">
                   <Typography variant="body2">
                     HWset1: {project.coamt1} checked out
@@ -235,14 +233,8 @@ function Projects({ token, handleLogout }) {
               token={token}
               refreshProjects={fetchProjects}
               fetchHardwareSets={fetchHardwareSets}
+              handleLeaveProject={handleLeaveProject}
             />
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => handleLeaveProject(project.projectId)}
-            >
-              Leave Project
-            </Button>
           </Box>      
           ))
       )}

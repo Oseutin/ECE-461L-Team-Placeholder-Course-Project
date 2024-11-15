@@ -5,7 +5,7 @@ import { ContentCopy } from '@mui/icons-material';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 
-function Project({ project, auth, refreshProjects, fetchHardwareSets }) {
+function Project({ project, auth, refreshProjects, fetchHardwareSets, handleLeaveProject }) {
     const [hardwareSets, setHardwareSets] = useState([]);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -46,6 +46,15 @@ function Project({ project, auth, refreshProjects, fetchHardwareSets }) {
                     ))}
                 </Box>
             </CardContent>
+            <Box display="flex" justifyContent="flex-end" margin="10px">
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => handleLeaveProject(project.projectId)}
+                >
+                    Leave Project
+                </Button>
+            </Box>
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
