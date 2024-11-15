@@ -6,8 +6,19 @@ import { motion } from 'framer-motion';
 function Home() {
   return (
     <Container>
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh">
-        <Box display="flex" justifyContent="center" mb={4}>
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh" mt={-6}>
+        <Box display="flex" justifyContent="center" alignItems="center" width="100%" mt={2} mb={4}>
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+          >
+            <Typography variant="h4" component="h4" gutterBottom>
+              <Box component="span" sx={{ bgcolor: 'primary.main', color: 'white', px: 2, py: 1, borderRadius: 2 }}>Hardware-as-a-Service</Box> at your fingertips.
+            </Typography>
+          </motion.div>
+        </Box>
+        <Box display="flex" justifyContent="center" mb={2}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -35,7 +46,7 @@ function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <Typography variant="h2" component="h1" gutterBottom>
+          <Typography variant="h1" component="h1" gutterBottom align="center">
             Welcome to Placeholder
           </Typography>
         </motion.div>
