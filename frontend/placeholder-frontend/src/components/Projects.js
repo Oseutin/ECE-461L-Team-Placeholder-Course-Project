@@ -6,7 +6,6 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { ContentCopy } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import io from 'socket.io-client';
 
 function Projects({ token, handleLogout }) {
   const [username, setUsername] = useState('');
@@ -66,17 +65,6 @@ function Projects({ token, handleLogout }) {
     fetchProjects();
     // eslint-disable-next-line
   }, [token]);
-
-  useEffect(() => {
-    const socket = io('http://localhost:5000');
-    socket.on('hardware_update', (data) => {
-      setUserInventory(data.hardwareSets);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
   const handleJoinProjectOpen = () => {
     setJoinDialogOpen(true);
