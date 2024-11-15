@@ -272,7 +272,7 @@ function Projects({ token, handleLogout }) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleJoinProjectClose} color="secondary">
+          <Button onClick={handleJoinProjectClose} color="primary">
             Cancel
           </Button>
           <Button onClick={handleJoinProjectSubmit} color="primary">
@@ -319,7 +319,7 @@ function Projects({ token, handleLogout }) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCreateProjectClose} color="secondary">
+          <Button onClick={handleCreateProjectClose} color="primary">
             Cancel
           </Button>
           <Button onClick={handleCreateProjectSubmit} color="primary">
