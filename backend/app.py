@@ -323,6 +323,36 @@ def checkin_hardware(project_id):
             return jsonify(
                 {'msg': 'Failed to check in hardware. Check the checked-out quantity and try again.'}), 400
 
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    token = request.headers.get('Authorization', '').split(' ')[1]
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({'msg': 'Unauthorized access'}), 401
+
+    username = user_data.get('username')
+    hashed_username = hashlib.sha256(username.encode()).hexdigest()
+    data = request.get_json()
+    current_password = data.get('currentPassword')
+    new_password = data.get('newPassword')
+
+    if not current_password or not new_password:
+        return jsonify({'msg': 'Current password and new password are required'}), 400
+
+    if not validate_password(new_password):
+        return jsonify({'msg': 'New password must be at least 8 characters long and include an uppercase letter, a number, and a special character'}), 400
+
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        db = usersDatabase(client)
+        user_info = db.get_user(hashed_username)
+        if user_info is None or not check_password_hash(user_info['password'], current_password):
+            return jsonify({'msg': 'Current password is incorrect'}), 400
+
+        hashed_new_password = generate_password_hash(new_password)
+        db.users_collection.update_one({'username': hashed_username}, {'$set': {'password': hashed_new_password}})
+
+    return jsonify({'msg': 'Password changed successfully'}), 200
+
 # Main entry point
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)

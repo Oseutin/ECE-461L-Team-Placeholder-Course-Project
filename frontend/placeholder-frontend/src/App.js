@@ -8,6 +8,7 @@ import Projects from './components/Projects';
 import Home from './components/Home';
 import About from './components/About';
 import Navbar from './components/Navbar';
+import Settings from './components/Settings';
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -60,6 +61,7 @@ function App() {
           <Route path="/login" element={<Login setAuth={setAuth} />} />
           <Route path="/signup" element={<Signup setAuth={setAuth} />} />
           <Route path="/projects" element={auth ? <Projects auth={auth} handleLogout={handleLogout} /> : <Navigate to="/" replace />} />
+          <Route path="/settings" element={auth ? <Settings setAuth={setAuth} /> : <Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

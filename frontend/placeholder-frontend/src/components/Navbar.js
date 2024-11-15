@@ -32,6 +32,7 @@ function Navbar({ auth, setAuth, themeMode, toggleTheme }) {
             {!auth && <Button color="inherit" component={Link} to="/">Home</Button>}
             <Button color="inherit" component={Link} to="/about">About</Button>
             {auth && <Button color="inherit" component={Link} to="/projects">Projects</Button>}
+            {auth && <Button color="inherit" component={Link} to="/settings">Settings</Button>}
           </Box>
           <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit">
             {themeMode === 'dark' ? <Brightness7 /> : <Brightness4 />}
@@ -57,6 +58,7 @@ function Navbar({ auth, setAuth, themeMode, toggleTheme }) {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleClose} component={Link} to="/projects">Projects</MenuItem>
+                <MenuItem onClick={handleClose} component={Link} to="/settings">Settings</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </>
