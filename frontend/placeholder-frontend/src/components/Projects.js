@@ -184,6 +184,7 @@ function Projects({ token, handleLogout }) {
         <Typography variant="h5" gutterBottom>Your Hardware Inventory</Typography>
         {Object.entries(userInventory).map(([projectId, hardwareSets]) => {
           const project = projectData[projectId];
+          if (!project) return null; // Add this check
           return (
             <motion.div
               key={projectId} // Add key prop here
