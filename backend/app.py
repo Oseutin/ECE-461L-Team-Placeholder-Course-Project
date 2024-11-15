@@ -8,6 +8,7 @@ import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import hashlib
 import re
+from flask_socketio import SocketIO, emit
 
 from usersDatabase import usersDatabase
 import projectsDatabase
@@ -16,6 +17,7 @@ import hardwareDatabase
 MONGODB_SERVER = "mongodb+srv://amybae:abcdefg@placeholdercluster.odsig.mongodb.net/myDatabase?retryWrites=true&w=majority"
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 Swagger(app)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
@@ -266,6 +268,12 @@ def get_hardware_sets(project_id):
         
     return jsonify({"hardwareSets": hardware_sets}), 200
 
+def notify_hardware_update():
+    with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
+        hardware_db = hardwareDatabase.hardwareDatabase(client)
+        hardware_sets = hardware_db.get_hardware_for_project()
+        socketio.emit('hardware_update', {'hardwareSets': hardware_sets})
+
 @app.route('/projects/<project_id>/checkout', methods=['POST'])
 def checkout_hardware(project_id):
     token = request.headers.get('Authorization', '').split(' ')[1]
@@ -287,6 +295,7 @@ def checkout_hardware(project_id):
         validAmt, amt = hardware_db.request_space(hw_set, qty)
         if validAmt:
             if project_db.check_out(project_id, hw_set, amt):
+                notify_hardware_update()
                 return jsonify({'msg': f'{amt} units checked out successfully for project {project_id}'}), 200
             else:
                 return jsonify(
@@ -315,6 +324,7 @@ def checkin_hardware(project_id):
 
         if project_db.check_in(project_id, hw_set, qty):
             if hardware_db.return_space(hw_set, qty):
+                notify_hardware_update()
                 return jsonify({'msg': f'{qty} units checked in successfully for project {project_id}'}), 200
             else:
                 return jsonify(
@@ -325,4 +335,4 @@ def checkin_hardware(project_id):
 
 # Main entry point
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    socketio.run(app, host='127.0.0.1', port=5000, debug=True)
