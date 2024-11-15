@@ -8,7 +8,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 function About() {
   return (
     <Container>
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh">
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh" mt={6} mb={6}>
         <Box display="flex" justifyContent="center" mb={4}>
           <motion.div
             initial={{ opacity: 0 }}
