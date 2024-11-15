@@ -49,7 +49,7 @@ function Project({ project, auth, refreshProjects, fetchHardwareSets, handleLeav
             <Box display="flex" justifyContent="flex-end" margin="10px">
                 <Button
                     variant="contained"
-                    color="secondary"
+                    color="primary" // Change to primary to match the theme color
                     onClick={() => handleLeaveProject(project.projectId)}
                 >
                     Leave Project

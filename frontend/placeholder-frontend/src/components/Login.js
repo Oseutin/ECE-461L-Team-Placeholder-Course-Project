@@ -106,7 +106,7 @@ function Login({ setAuth }) {
           </Button>
           <Button
             variant="text"
-            color="secondary"
+            color="primary"
             fullWidth
             style={{ marginTop: '1em' }}
             onClick={() => navigate('/signup')}

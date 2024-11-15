@@ -181,10 +181,10 @@ function Signup({ setAuth }) {
           </Button>
           <Button
             variant="text"
-            color="secondary"
+            color="primary"
             fullWidth
             style={{ marginTop: '1em' }}
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/login')}
           >
             Already have an account? Log in
           </Button>

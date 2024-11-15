@@ -55,7 +55,7 @@ function HardwareSet({ hardwareSet, projectId, auth, refreshProjects }) {
                     style={{ width: '60%' }}
                 />
                 <Box display="flex" justifyContent="flex-end" alignItems="center" style={{ width: '40%' }}>
-                    <Button variant="contained" color="secondary" onClick={handleCheckIn} style={{ marginRight: '10px' }}>
+                    <Button variant="contained" color="primary" onClick={handleCheckIn} style={{ marginRight: '10px' }}>
                         Check In
                     </Button>
                     <Button variant="contained" color="primary" onClick={handleCheckOut}>

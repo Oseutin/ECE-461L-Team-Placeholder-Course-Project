@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import Project from './Project';
 import { Container, Typography, Button, Box, CircularProgress, Snackbar, Alert, Card, CardContent, TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { ContentCopy } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 
 function Projects({ token, handleLogout }) {
   const [username, setUsername] = useState('');
@@ -17,7 +17,6 @@ function Projects({ token, handleLogout }) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newProjectId, setNewProjectId] = useState('');
   const [newProject, setNewProject] = useState({ id: '', name: '', description: '' });
-  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -66,11 +65,6 @@ function Projects({ token, handleLogout }) {
     fetchProjects();
     // eslint-disable-next-line
   }, [token]);
-
-  const handleLogoutClick = () => {
-    handleLogout();
-    navigate('/');
-  };
 
   const handleJoinProjectOpen = () => {
     setJoinDialogOpen(true);
@@ -184,9 +178,6 @@ function Projects({ token, handleLogout }) {
         <Typography variant="body1" color="textSecondary">
           Logged in as: {username}
         </Typography>
-        <Button variant="outlined" color="secondary" onClick={handleLogoutClick}>
-          Logout
-        </Button>
       </Box>
       
       <Box marginBottom="20px">
@@ -194,25 +185,32 @@ function Projects({ token, handleLogout }) {
         {Object.entries(userInventory).map(([projectId, hardwareSets]) => {
           const project = projectData[projectId];
           return (
-            <Card key={projectId} style={{ marginBottom: '15px' }}>
-              <CardContent>
-                <Typography variant="h6">
-                  {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (Project ID: {projectId}
-                  <Button onClick={() => handleCopyProjectId(projectId)} style={{ marginLeft: '5px' }} title="Copy Project ID">
-                    <ContentCopy fontSize="small" />
-                  </Button>)</span>
-                </Typography>
-                <Typography variant="body2" color="textSecondary">{project.description}</Typography>
-                <Box marginTop="10px">
-                  <Typography variant="body2">
-                    HWset1: {project.coamt1} checked out
+            <motion.div
+              key={projectId} // Add key prop here
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card style={{ marginBottom: '15px' }}>
+                <CardContent>
+                  <Typography variant="h6">
+                    {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (Project ID: {projectId}
+                    <Button onClick={() => handleCopyProjectId(projectId)} style={{ marginLeft: '5px' }} title="Copy Project ID">
+                      <ContentCopy fontSize="small" />
+                    </Button>)</span>
                   </Typography>
-                  <Typography variant="body2">
-                    HWset2: {project.coamt2} checked out
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
+                  <Typography variant="body2" color="textSecondary">{project.description}</Typography>
+                  <Box marginTop="10px">
+                    <Typography variant="body2">
+                      HWset1: {project.coamt1} checked out
+                    </Typography>
+                    <Typography variant="body2">
+                      HWset2: {project.coamt2} checked out
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
           );
         })}
       </Box>
@@ -227,23 +225,30 @@ function Projects({ token, handleLogout }) {
         <Typography variant="h6">No authorized projects available.</Typography>
       ) : (
         Object.values(projectData).map((project) => (
-          <Box key={project.id} style={{ marginBottom: '15px' }}>
-            <Project
-              project={project}
-              token={token}
-              refreshProjects={fetchProjects}
-              fetchHardwareSets={fetchHardwareSets}
-              handleLeaveProject={handleLeaveProject}
-            />
-          </Box>      
-          ))
+          <motion.div
+            key={project.id} // Add key prop here
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Box style={{ marginBottom: '15px' }}>
+              <Project
+                project={project}
+                token={token}
+                refreshProjects={fetchProjects}
+                fetchHardwareSets={fetchHardwareSets}
+                handleLeaveProject={handleLeaveProject}
+              />
+            </Box>
+          </motion.div>
+        ))
       )}
 
       <Box display="flex" flexDirection="column" alignItems="center" marginTop="20px">
-        <Button variant="contained" color="primary" onClick={handleJoinProjectOpen} style={{ marginBottom: '10px' }}>
+        <Button variant="contained" color="primary" onClick={handleJoinProjectOpen} style={{ marginBottom: '10px' }} title="Join Existing Project">
           Join Existing Project
         </Button>
-        <Button variant="contained" color="primary" onClick={handleCreateProjectOpen}>
+        <Button variant="contained" color="primary" onClick={handleCreateProjectOpen} title="Create New Project">
           Create New Project
         </Button>
       </Box>
