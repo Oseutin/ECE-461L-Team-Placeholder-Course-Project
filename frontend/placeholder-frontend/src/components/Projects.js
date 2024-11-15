@@ -197,7 +197,7 @@ function Projects({ token, handleLogout }) {
             <Card key={projectId} style={{ marginBottom: '15px' }}>
               <CardContent>
                 <Typography variant="h6">
-                  {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (ID: {projectId}
+                  {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (Project ID: {projectId}
                   <Button onClick={() => handleCopyProjectId(projectId)} style={{ marginLeft: '5px' }} title="Copy Project ID">
                     <ContentCopy fontSize="small" />
                   </Button>)</span>
