@@ -5,6 +5,13 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './styles.css';
 
+// Add metadata
+document.title = "Placeholder HaaS System";
+const link = document.createElement('link');
+link.rel = 'icon';
+link.href = '/webicon.png';
+document.head.appendChild(link);
+
 ReactDOM.render(
   <React.StrictMode>
     <App />
