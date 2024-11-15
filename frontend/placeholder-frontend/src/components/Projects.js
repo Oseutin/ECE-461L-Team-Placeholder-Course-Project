@@ -206,11 +206,12 @@ function Projects({ token, handleLogout }) {
                   {project.description}
                 </Typography>
                 <Box marginTop="10px">
-                  {Object.entries(hardwareSets).map(([hwSetId, quantity]) => (
-                    <Typography key={hwSetId} variant="body2">
-                      {hwSetId}: {quantity} checked out
-                    </Typography>
-                  ))}
+                  <Typography variant="body2">
+                    HWset1: {project.coamt1} checked out
+                  </Typography>
+                  <Typography variant="body2">
+                    HWset2: {project.coamt2} checked out
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>

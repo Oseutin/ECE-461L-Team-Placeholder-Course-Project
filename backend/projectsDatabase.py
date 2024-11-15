@@ -33,6 +33,7 @@ class projectsDatabase:
 
     def get_all_projects(self):
         projects = list(self.project_collection.find({}))
+
         for project in projects:
             project['_id'] = str(project['_id'])
         return projects

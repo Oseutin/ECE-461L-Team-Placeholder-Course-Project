@@ -60,20 +60,12 @@ class hardwareDatabase:
         user_inventory = {}
 
         for project in projects:
-            # Ensure `project` is a dictionary and `users` is a list of dictionaries
-            if isinstance(project, dict) and 'projectId' in project and isinstance(project.get('users'), list):
-                project_id = project['projectId']
-                try:
-                    # Safely iterate over users to find the correct user info
-                    user_info = next((user for user in project['users'] if isinstance(user, dict) and user.get('username') == username), None)
-
-                    # Add the user's hardware inventory if available
-                    if user_info:
-                        user_inventory[project_id] = user_info.get("hardware", {})
-                except TypeError as e:
-                    print(f"Error processing project {project_id}: {e}")  # Debugging line
-            else:
-                print(f"Unexpected project structure: {project}")  # Debugging line
+            project_id = project['projectId']
+            hardware_sets = {
+                "HWset1": project.get('coamt1', 0),
+                "HWset2": project.get('coamt2', 0)
+            }
+            user_inventory[project_id] = hardware_sets
 
         return user_inventory
     
