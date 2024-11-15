@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify,send_from_directory
 from flask_cors import CORS
 from flasgger import Swagger
 from pymongo import MongoClient
@@ -15,9 +16,9 @@ import hardwareDatabase
 
 MONGODB_SERVER = "mongodb+srv://amybae:abcdefg@placeholdercluster.odsig.mongodb.net/myDatabase?retryWrites=true&w=majority"
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='build')
 Swagger(app)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+CORS(app)
 
 SECRET_KEY = "VerySecret"
 
@@ -352,6 +353,15 @@ def change_password():
         db.users_collection.update_one({'username': hashed_username}, {'$set': {'password': hashed_new_password}})
 
     return jsonify({'msg': 'Password changed successfully'}), 200
+
+
+# Serve the build folder files (like JS, CSS, etc.)
+@app.route('/', defaults = {'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, 'index.html')
 
 # Main entry point
 if __name__ == '__main__':
