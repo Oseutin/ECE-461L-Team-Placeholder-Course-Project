@@ -197,32 +197,34 @@ function Projects({ token, handleLogout }) {
         {Object.entries(userInventory).map(([projectId, hardwareSets]) => {
           const project = projectData[projectId];
           return (
-            <motion.div
-              key={projectId} // Add key prop here
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card style={{ marginBottom: '15px' }}>
-                <CardContent>
-                  <Typography variant="h6">
-                    {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (Project ID: {projectId}
-                    <Button onClick={() => handleCopyProjectId(projectId)} style={{ marginLeft: '5px' }} title="Copy Project ID">
-                      <ContentCopy fontSize="small" />
-                    </Button>)</span>
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">{project.description}</Typography>
-                  <Box marginTop="10px">
-                    <Typography variant="body2">
-                      HWset1: {project.coamt1} checked out
+            project && (
+              <motion.div
+                key={projectId} // Add key prop here
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card style={{ marginBottom: '15px' }}>
+                  <CardContent>
+                    <Typography variant="h6">
+                      {project.projectName} <span style={{ fontSize: '0.8em', color: 'gray' }}> (Project ID: {projectId}
+                      <Button onClick={() => handleCopyProjectId(projectId)} style={{ marginLeft: '5px' }} title="Copy Project ID">
+                        <ContentCopy fontSize="small" />
+                      </Button>)</span>
                     </Typography>
-                    <Typography variant="body2">
-                      HWset2: {project.coamt2} checked out
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </motion.div>
+                    <Typography variant="body2" color="textSecondary">{project.description}</Typography>
+                    <Box marginTop="10px">
+                      <Typography variant="body2">
+                        HWset1: {project.coamt1} checked out
+                      </Typography>
+                      <Typography variant="body2">
+                        HWset2: {project.coamt2} checked out
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
           );
         })}
       </Box>
