@@ -6,7 +6,6 @@ from pymongo.server_api import ServerApi
 import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-import hashlib
 import re
 
 from usersDatabase import usersDatabase
@@ -58,12 +57,10 @@ def login():
     if not username or not password:
         return jsonify({"msg": "Username and password are required fields"}), 400
 
-    hashed_username = hashlib.sha256(username.encode()).hexdigest()
-
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         db = usersDatabase(client)
         
-        user_info = db.get_user(hashed_username)
+        user_info = db.get_user(username)
         if user_info is None or not check_password_hash(user_info['password'], password):
             return jsonify({"msg": "Invalid username or password"}), 400
 
@@ -105,12 +102,11 @@ def add_user():
     if not validate_password(password):
         return jsonify({"msg": "Password must be at least 8 characters long and include an uppercase letter, a number, and a special character"}), 400
 
-    hashed_username = hashlib.sha256(username.encode()).hexdigest()
     hashed_password = generate_password_hash(password)
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         db = usersDatabase(client)
-        if not db.add_user(hashed_username, hashed_password):
+        if not db.add_user(username, hashed_password):
             return jsonify({"msg": "Failed to add user due to validation or duplicate issues"}), 400
         
     token = jwt.encode(
@@ -130,9 +126,8 @@ def create_project():
         return jsonify({'msg': 'Unauthorized access'}), 401
 
     username = user_data.get('username')
-    hashed_username = hashlib.sha256(username.encode()).hexdigest()
     project_data = request.json.get('project_data')
-    if not hashed_username or not project_data:
+    if not username or not project_data:
         return jsonify({'msg': 'Username and project data are required'}), 400
 
     project_name = project_data.get('name')
@@ -149,14 +144,14 @@ def create_project():
         project_db = projectsDatabase.projectsDatabase(client)
         user_db = usersDatabase(client)
 
-        user = user_db.get_user(hashed_username)
+        user = user_db.get_user(username)
         if not user:
             return jsonify({'msg': 'User not found'}), 404
 
-        if not project_db.create_project(project_name, project_id, description, hashed_username):
+        if not project_db.create_project(project_name, project_id, description, username):
             return jsonify({"msg": "Project ID already exists"}), 400
 
-        user_db.add_project_to_user(hashed_username, project_id)
+        user_db.add_project_to_user(username, project_id)
 
     return jsonify({"msg": "Project created and added to user successfully"}), 200
 
@@ -168,17 +163,16 @@ def fetch_inventory():
         return jsonify({'msg': 'Unauthorized access'}), 401
 
     username = user_data['username']
-    hashed_username = hashlib.sha256(username.encode()).hexdigest()
 
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         project_db = projectsDatabase.projectsDatabase(client)
         hardware_db = hardwareDatabase.hardwareDatabase(client)
 
         # Fetch all projects
-        projects = project_db.get_projects_by_user(hashed_username)
+        projects = project_db.get_projects_by_user(username)
         
         # Retrieve hardware inventory specific to the user
-        user_inventory = hardware_db.get_user_hardware(hashed_username, projects)
+        user_inventory = hardware_db.get_user_hardware(username, projects)
 
     return jsonify({"projects": projects, "userInventory": user_inventory}), 200
 
@@ -196,8 +190,6 @@ def join_project():
     if not username or not project_id:
         return jsonify({'msg': 'Username and project ID are required'}), 400
 
-    hashed_username = hashlib.sha256(username.encode()).hexdigest()
-
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         project_db = projectsDatabase.projectsDatabase(client)
         user_db = usersDatabase(client)
@@ -206,12 +198,12 @@ def join_project():
         if not project:
             return jsonify({'msg': 'Project not found'}), 404
 
-        user = user_db.get_user(hashed_username)
+        user = user_db.get_user(username)
         if not user:
             return jsonify({'msg': 'User not found'}), 404
 
-        if project_db.add_user(project_id, hashed_username):
-            user_db.add_project_to_user(hashed_username, project_id)
+        if project_db.add_user(project_id, username):
+            user_db.add_project_to_user(username, project_id)
             return jsonify({'msg': f'User {username} joined project {project_id} successfully'}), 200
         else:
             return jsonify({'msg': 'User is already a member of the project or an error occurred'}), 400
@@ -230,8 +222,6 @@ def leave_project():
     if not username or not project_id:
         return jsonify({'msg': 'Username and project ID are required'}), 400
     
-    hashed_username = hashlib.sha256(username.encode()).hexdigest()
-    
     with MongoClient(MONGODB_SERVER, server_api=ServerApi('1')) as client:
         project_db = projectsDatabase.projectsDatabase(client)
         user_db = usersDatabase(client)
@@ -240,12 +230,12 @@ def leave_project():
         if not project:
             return jsonify({'msg': 'Project not found'}), 404
         
-        user = user_db.get_user(hashed_username)
+        user = user_db.get_user(username)
         if not user:
             return jsonify({'msg': 'User not found'}), 404
         
-        if project_db.remove_user(project_id, hashed_username):
-            user_db.remove_project_from_user(hashed_username, project_id)
+        if project_db.remove_user(project_id, username):
+            user_db.remove_project_from_user(username, project_id)
             return jsonify({'msg': f'User {username} left project {project_id} successfully'}), 200
         else:
             return jsonify({'msg': 'User is not a member of the project or an error occurred'}), 400
